@@ -1,6 +1,6 @@
 # Art Direction and 精灵 Logic
 
-Use this reference for every Huanling Journal generation.
+Use this reference for every Huanling Skills generation.
 
 ## Select and locate the source object
 

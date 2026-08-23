@@ -140,12 +140,12 @@ def _truncate_line(draw, text, font, max_width):
 
 
 def _fit_lore(draw, text, font_path, max_width, max_lines=2):
-    for size in range(38, 25, -2):
+    for size in range(32, 23, -2):
         font = ImageFont.truetype(font_path, size)
         lines = _wrap_chars(draw, text, font, max_width)
         if len(lines) <= max_lines:
             return font, lines
-    font = ImageFont.truetype(font_path, 25)
+    font = ImageFont.truetype(font_path, 23)
     lines = _wrap_chars(draw, text, font, max_width)
     visible = lines[:max_lines]
     if len(lines) > max_lines:
@@ -292,8 +292,8 @@ def compose_journal(
     draw = ImageDraw.Draw(canvas)
     _draw_sketch_rect(draw, photo_box, (91, 75, 54), width=3, seed=21)
 
-    draw.text((1390, 82), "显灵现场", font=label_font, fill=MUTED_INK)
-    draw.line((1530, 103, 2268, 103), fill=LINE, width=2)
+    draw.text((1390, 82), "唤灵", font=label_font, fill=MUTED_INK)
+    draw.line((1460, 103, 2268, 103), fill=LINE, width=2)
 
     scene_box = (1380, 128, 2295, 955)
     _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))
@@ -323,7 +323,7 @@ def compose_journal(
     draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
     footer_font = ImageFont.truetype(regular_font_path, 21)
     draw.text(
-        (1390, 1486), "HUANLING · SCENE NOTE", font=footer_font, fill=MUTED_INK
+        (1390, 1486), "HUANLING · SKILLS", font=footer_font, fill=MUTED_INK
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

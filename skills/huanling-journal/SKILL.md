@@ -3,7 +3,7 @@ name: huanling-journal
 description: Turn one visible object in a user-provided everyday photo into an original collectible-style 精灵, repaint the same scene with the 精灵 replacing that object in place, and compose the untouched photo beside the bright hand-painted transformation scene. Use when the user asks to 唤灵, create a 精灵 from a photographed cup, plant, grass, stone, tool, or other visible object, or make an original creature-card-like scene without copying any existing franchise. Select one object automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
 ---
 
-# Huanling Journal
+# Huanling Skills
 
 Create one original 精灵 from one visible everyday object. Show the untouched source photo beside a hand-painted version of the same scene in which that object has become the 精灵. Generate intermediate art only to keep the design consistent; deliver one final A+B image.
 

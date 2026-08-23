@@ -120,6 +120,19 @@ class ComposeJournalTests(unittest.TestCase):
         result = self.compose(photo, self.root / "long-lore.png", lore=lore)
         self.assertTrue(result.is_file())
 
+    def test_lore_uses_secondary_text_scale(self):
+        regular_font, _ = COMPOSER.resolve_fonts()
+        image = Image.new("RGB", (1000, 300), "white")
+        draw = ImageDraw.Draw(image)
+        font, lines = COMPOSER._fit_lore(
+            draw,
+            "听见幼鸟叫声时，它会走到树下抬起叶冠，为鸟巢挡住迎面吹来的风。",
+            regular_font,
+            870,
+        )
+        self.assertLessEqual(font.size, 32)
+        self.assertLessEqual(len(lines), 2)
+
     def test_missing_explicit_font_has_actionable_error(self):
         photo = self.root / "photo.png"
         make_fixture(photo, (900, 900), (120, 130, 150), (220, 190, 90))
