@@ -38,10 +38,12 @@ Create one original 精灵 from one visible everyday object. Show the untouched 
    archetype: <gentle|nimble|fierce|evolved-guardian>
    name_candidates: [<five original names>]
    name: <selected 2-4-character Chinese name, or compact localized name>
-   personality: <2-6 Chinese characters>
-   hobby: <4-10 Chinese characters>
-   lore: <one original behavioral sentence, normally 24-44 Chinese characters>
+   personality: <2-6 plain Chinese characters>
+   hobby: <4-10-character observable verb-object activity>
+   lore: <one plain-spoken trigger-action-result sentence, normally 24-44 Chinese characters>
    ```
+
+   - Run the reference's literal-paraphrase, semantic-fit, and read-aloud checks on all three fields. Rewrite any field that depends on an unexplained metaphor or assigns an impossible action to sound, shadow, emotion, time, or another abstract thing.
 
 5. Generate a temporary, text-free 精灵 design.
    - Use built-in `image_gen` in `stylized-concept` mode. Do not switch to API or CLI unless the user explicitly requests it.
@@ -77,7 +79,7 @@ Create one original 精灵 from one visible everyday object. Show the untouched 
 
 8. Validate and deliver.
    - Inspect the final spread with `view_image`.
-   - Confirm A is complete and unaltered; B matches its viewpoint and landmarks; the selected object is replaced in place; the 精灵 matches its temporary design; all deterministic text is exact and readable.
+   - Confirm A is complete and unaltered; B matches its viewpoint and landmarks; the selected object is replaced in place; the 精灵 matches its temporary design; all deterministic text is exact, readable, plain-spoken, and semantically coherent.
    - Confirm there is no thick black outline, gloomy gray cast, generated text, trademarked imagery, plastic 3D finish, or watermark.
    - Display the final A+B image inline and return only its path. Briefly state the selected object, final name, archetype, three cues, and whether correction was needed.
 

@@ -43,9 +43,21 @@ Good pattern examples are `苔角`, `茶咕`, `巡梢`, and `露芽`; treat them
 
 ## Write the record
 
-- Personality: 2-6 Chinese characters with a specific contrast when useful, such as `胆小护短`.
-- Hobby: 4-10 Chinese characters describing observable behavior.
-- Lore: one original behavioral sentence, normally 24-44 Chinese characters. Use a reaction, habit, defense, or ecological effect. Do not use battle statistics, rarity labels, type systems, or copied card language.
+- **Personality:** use 2-6 plain Chinese characters that a person would naturally use to describe temperament, such as `温和警觉`, `胆小护短`, or `外冷内热`. Do not invent poetic labels that need explanation.
+- **Hobby:** use 4-10 Chinese characters as a concrete, repeatable verb-object activity that an observer could actually see, such as `收集落叶`, `给幼鸟挡风`, or `趴在窗边晒太阳`. Do not write vague metaphors such as `替风整理树冠`, `收藏月光`, or `梳理回声`.
+- **Lore:** use one plain-spoken sentence, normally 24-44 Chinese characters. Write a clear trigger, a concrete action, and an understandable result. The subject must be capable of the verb, and the object must be something that verb can act on. Do not treat sound, shadow, silence, time, or emotion as physical objects that can be carried, hidden, returned, folded, or stored unless the concept record explicitly defines a visible mechanism that does so.
+- Prefer familiar verbs such as `听见`, `跑到`, `抬起`, `挡住`, `跟着`, `寻找`, `叫醒`, `躲进`, and `放下`. Keep one main idea per sentence. Do not use battle statistics, rarity labels, type systems, copied card language, or decorative fantasy prose.
+
+Use this three-part check before accepting any record:
+
+1. **Literal paraphrase:** can an ordinary reader restate the sentence without guessing what the metaphor means?
+2. **Semantic fit:** can the subject physically perform the verb, and can the object logically receive that action?
+3. **Read-aloud test:** does it sound like natural spoken Chinese after one reading?
+
+Reject and rewrite the whole field when any check fails. For example:
+
+- Reject hobby `替风整理树冠`; use `给幼鸟挡风` or `抖落树冠枯叶`.
+- Reject lore `它把走散的鸟鸣送回树影里`; use `听见幼鸟叫声时，它会走到树下抬起叶冠，为鸟巢挡住迎面吹来的风。`.
 
 ## Visual language
 
@@ -56,7 +68,7 @@ Aim for the environmental storytelling and strong focal hierarchy of a collectib
 - **Edges:** no thick black outline. Separate forms with dark colored pencil, adjacent color contrast, and simple light-shadow groups.
 - **Color:** luminous scene color, soft environmental hues, and a few saturated focal accents. Preserve dark source materials without allowing gray-brown to dominate the whole image.
 - **Surface:** dry-brush edges, small gaps, uneven fill, colored-pencil strokes, mild asymmetry, and human-looking corrections.
-- **Scene:** retain foreground, middle ground, background, viewpoint, and recognizable landmarks. Use wind, foliage, reflected light, or small environmental reactions to reveal the 精灵's behavior.
+- **Scene:** retain foreground, middle ground, background, viewpoint, and recognizable landmarks. Show one concrete behavior through visible cause and effect, such as leaves bending because the 精灵 blocks the wind.
 
 Avoid photorealistic monsters, gloomy grading, heavy black contouring, 3D render, plastic gloss, airbrushed gradients, neon rim light, perfect symmetry, hyper-detailed armor, generic mascot design, or a location unrelated to the source.
 
@@ -86,7 +98,7 @@ Primary request: repaint the complete source scene as a bright collectible creat
 Scene: preserve the original camera viewpoint, aspect ratio, foreground/middle/background structure, and [three landmarks]; keep it recognizably the same location
 Subject placement: exactly one 精灵 at the original object's approximate position, scale, depth, orientation, and ground contact; the original object must be absent
 Style/medium: luminous colored gouache and colored pencil on subtly textured paper; loose environment strokes; crisp readable 精灵 details; no thick black outline
-Lighting/mood: retain the source time of day while making the palette bright, lively, and welcoming; show [behavior] through a small environmental reaction
+Lighting/mood: retain the source time of day while making the palette bright, lively, and welcoming; show [concrete behavior] through a physically understandable environmental reaction
 Constraints: maintain the exact identity, palette, and anatomy from Image 2; no text, letters, numbers, symbols, card frame, property icon, energy mark, statistics, logo, watermark, or existing franchise element
 Avoid: different location, moved landmarks, duplicate creature, remaining source object, gloomy gray cast, photorealism, 3D, plastic gloss, heavy black contour, branded trading-card UI, AI gibberish
 ```
