@@ -45,19 +45,13 @@ Good pattern examples are `苔角`, `茶咕`, `巡梢`, and `露芽`; treat them
 
 - **Personality:** use 2-6 plain Chinese characters that a person would naturally use to describe temperament, such as `温和警觉`, `胆小护短`, or `外冷内热`. Do not invent poetic labels that need explanation.
 - **Hobby:** use 4-10 Chinese characters as a concrete, repeatable verb-object activity that an observer could actually see, such as `收集落叶`, `给幼鸟挡风`, or `趴在窗边晒太阳`. Do not write vague metaphors such as `替风整理树冠`, `收藏月光`, or `梳理回声`.
-- **Lore:** use one plain-spoken sentence, normally 24-44 Chinese characters. Write a clear trigger, a concrete action, and an understandable result. The subject must be capable of the verb, and the object must be something that verb can act on. Do not treat sound, shadow, silence, time, or emotion as physical objects that can be carried, hidden, returned, folded, or stored unless the concept record explicitly defines a visible mechanism that does so.
-- Prefer familiar verbs such as `听见`, `跑到`, `抬起`, `挡住`, `跟着`, `寻找`, `叫醒`, `躲进`, and `放下`. Keep one main idea per sentence. Do not use battle statistics, rarity labels, type systems, copied card language, or decorative fantasy prose.
 
-Use this three-part check before accepting any record:
+Use this two-part check before accepting either field:
 
 1. **Literal paraphrase:** can an ordinary reader restate the sentence without guessing what the metaphor means?
-2. **Semantic fit:** can the subject physically perform the verb, and can the object logically receive that action?
-3. **Read-aloud test:** does it sound like natural spoken Chinese after one reading?
+2. **Read-aloud test:** does it sound like natural spoken Chinese after one reading?
 
-Reject and rewrite the whole field when any check fails. For example:
-
-- Reject hobby `替风整理树冠`; use `给幼鸟挡风` or `抖落树冠枯叶`.
-- Reject lore `它把走散的鸟鸣送回树影里`; use `听见幼鸟叫声时，它会走到树下抬起叶冠，为鸟巢挡住迎面吹来的风。`.
+Reject hobby `替风整理树冠`; use `给幼鸟挡风` or `抖落树冠枯叶`.
 
 ## Visual language
 
@@ -72,39 +66,22 @@ Aim for the environmental storytelling and strong focal hierarchy of a collectib
 
 Avoid photorealistic monsters, gloomy grading, heavy black contouring, 3D render, plastic gloss, airbrushed gradients, neon rim light, perfect symmetry, hyper-detailed armor, generic mascot design, or a location unrelated to the source.
 
-## Prompt 1: temporary 精灵 design
+## Fast-path prompt: transformed scene B
 
 ```text
-Use case: stylized-concept
-Asset type: temporary original 精灵 identity reference
-Input images: Image 1 is a source-object reference only, not an edit target
-Primary request: transform the visible [selected object] into exactly one original collectible companion 精灵
-Subject: [archetype and simplified body plan]; preserve [silhouette cue], [color/material cue], and [structural cue]
-Scene/backdrop: simple warm light paper with no environment and no card layout
-Style/medium: bright opaque gouache, colored-pencil details and hatching, visible paper tooth, handmade irregularities, no thick black outline
-Composition/framing: one full-body 精灵, clear animated silhouette, expressive eyes and pose, generous breathing room
-Lighting/mood: bright natural light; [temperament]
-Constraints: original design; coherent anatomy; no literal intact object with limbs; no text, numbers, symbols, logos, card frame, property icon, watermark, or franchise element
-Avoid: realistic monster, gray-brown dominance, gloomy mood, 3D, plastic gloss, heavy black contour, generic anime mascot, existing character resemblance, AI gibberish
-```
-
-## Prompt 2: transformed scene B
-
-```text
-Use case: compositing and style-transfer
+Use case: single-call image-to-image transformation
 Asset type: text-free transformed-scene illustration for an A+B journal
-Input images: Image 1 is the source scene and composition/edit target for a new derivative output only; Image 2 is the exact 精灵 identity reference
-Primary request: repaint the complete source scene as a bright collectible creature-card illustration, remove [selected object], and place the same 精灵 from Image 2 at [source region]
-Scene: preserve the original camera viewpoint, aspect ratio, foreground/middle/background structure, and [three landmarks]; keep it recognizably the same location
-Subject placement: exactly one 精灵 at the original object's approximate position, scale, depth, orientation, and ground contact; the original object must be absent
-Style/medium: luminous colored gouache and colored pencil on subtly textured paper; loose environment strokes; crisp readable 精灵 details; no thick black outline
-Lighting/mood: retain the source time of day while making the palette bright, lively, and welcoming; show [concrete behavior] through a physically understandable environmental reaction
-Constraints: maintain the exact identity, palette, and anatomy from Image 2; no text, letters, numbers, symbols, card frame, property icon, energy mark, statistics, logo, watermark, or existing franchise element
+Input images: Image 1 is the source scene and composition/edit target for a new derivative output only
+Primary request: repaint the complete source scene as a bright collectible creature-card illustration, remove [selected object], and replace it in place with exactly one original [archetype] 精灵
+Subject design: simplify [silhouette cue], [color/material cue], and [structural cue] into coherent anatomy, a clear animated silhouette, an expressive face, and a pose showing [hobby or other concrete behavior]
+Scene: preserve the original aspect ratio, camera viewpoint, foreground/middle/background structure, and [three landmarks]; keep it recognizably the same location
+Subject placement: use the original object's approximate position, scale, depth, orientation, and ground contact; the original object must be absent
+Style/medium: bright opaque gouache, colored-pencil details and hatching, visible paper tooth, handmade irregularities, no thick black outline
+Lighting/mood: retain the source time of day while making the palette bright, lively, and welcoming
+Constraints: original design; no literal intact object with limbs; no text, letters, numbers, symbols, card frame, property icon, energy mark, statistics, logo, watermark, or existing franchise element
 Avoid: different location, moved landmarks, duplicate creature, remaining source object, gloomy gray cast, photorealism, 3D, plastic gloss, heavy black contour, branded trading-card UI, AI gibberish
 ```
 
-## Review both stages
+## Review the result
 
-Accept the temporary design only when exactly one original 精灵 appears, all three cues remain legible, the silhouette is simplified, the expression fits the archetype, and no forbidden content appears.
-
-Accept B only when the same 精灵 appears once at the recorded source region, the original object is absent, the three landmarks and viewpoint remain recognizable, the scene is bright and layered, and no generated text or branded imagery appears. Request one focused correction for a failed condition without redesigning successful parts.
+Accept B when exactly one original 精灵 appears at the recorded source region, all three cues remain legible, the literal object is absent, the three landmarks and viewpoint remain recognizable, the scene is bright and layered, and no generated text or branded imagery appears. Request one focused correction only for a mandatory failure; accept harmless stylistic variation to protect the fast path.

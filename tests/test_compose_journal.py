@@ -57,15 +57,13 @@ class ComposeJournalTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def compose(self, photo, output, lore=None, font_path=None):
+    def compose(self, photo, output, font_path=None):
         return COMPOSER.compose_journal(
             photo_path=photo,
             scene_path=self.scene,
             name="茶咕",
             personality="慢热好奇",
             hobby="收集清晨露珠",
-            lore=lore
-            or "受惊时，它会合拢杯沿般的耳翼，让积存的雨声滚成低低的警告。",
             output_path=output,
             font_path=font_path,
         )
@@ -110,29 +108,6 @@ class ComposeJournalTests(unittest.TestCase):
         self.assertEqual("journal.png", first.name)
         self.assertEqual("journal-v2.png", second.name)
 
-    def test_long_lore_fits_without_failure(self):
-        photo = self.root / "photo.png"
-        make_fixture(photo, (900, 1400), (140, 105, 155), (225, 205, 95))
-        lore = (
-            "每当风从窗边经过，它就会把层层叶片竖成天线，收集屋里每一声细响，"
-            "再悄悄藏进柔软的腹甲里。" * 3
-        )
-        result = self.compose(photo, self.root / "long-lore.png", lore=lore)
-        self.assertTrue(result.is_file())
-
-    def test_lore_uses_secondary_text_scale(self):
-        regular_font, _ = COMPOSER.resolve_fonts()
-        image = Image.new("RGB", (1000, 300), "white")
-        draw = ImageDraw.Draw(image)
-        font, lines = COMPOSER._fit_lore(
-            draw,
-            "听见幼鸟叫声时，它会走到树下抬起叶冠，为鸟巢挡住迎面吹来的风。",
-            regular_font,
-            870,
-        )
-        self.assertLessEqual(font.size, 32)
-        self.assertLessEqual(len(lines), 2)
-
     def test_missing_explicit_font_has_actionable_error(self):
         photo = self.root / "photo.png"
         make_fixture(photo, (900, 900), (120, 130, 150), (220, 190, 90))
@@ -156,14 +131,13 @@ class ComposeJournalTests(unittest.TestCase):
                 "慢热好奇",
                 "--hobby",
                 "收集清晨露珠",
-                "--lore",
-                "风起时，它会把耳翼转向最先响起的窗沿。",
                 "--output",
                 "journal.png",
             ]
         )
         self.assertEqual("scene.png", parsed.scene)
         self.assertFalse(hasattr(parsed, "creature"))
+        self.assertFalse(hasattr(parsed, "lore"))
 
     def test_missing_scene_has_actionable_error(self):
         photo = self.root / "photo.png"
@@ -175,7 +149,6 @@ class ComposeJournalTests(unittest.TestCase):
                 name="茶咕",
                 personality="慢热好奇",
                 hobby="收集清晨露珠",
-                lore="风起时，它会把耳翼转向最先响起的窗沿。",
                 output_path=self.root / "missing-scene.png",
             )
 

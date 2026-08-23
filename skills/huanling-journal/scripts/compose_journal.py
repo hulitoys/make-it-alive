@@ -113,46 +113,6 @@ def _font_that_fits(draw, text, font_path, max_width, start_size, min_size):
     return ImageFont.truetype(font_path, min_size)
 
 
-def _wrap_chars(draw, text, font, max_width):
-    normalized = " ".join(str(text).split())
-    if not normalized:
-        return [""]
-    lines = []
-    current = ""
-    for char in normalized:
-        candidate = current + char
-        if current and _text_width(draw, candidate, font) > max_width:
-            lines.append(current.rstrip())
-            current = char.lstrip()
-        else:
-            current = candidate
-    if current or not lines:
-        lines.append(current.rstrip())
-    return lines
-
-
-def _truncate_line(draw, text, font, max_width):
-    ellipsis = "…"
-    value = text
-    while value and _text_width(draw, value + ellipsis, font) > max_width:
-        value = value[:-1]
-    return value + ellipsis
-
-
-def _fit_lore(draw, text, font_path, max_width, max_lines=2):
-    for size in range(32, 23, -2):
-        font = ImageFont.truetype(font_path, size)
-        lines = _wrap_chars(draw, text, font, max_width)
-        if len(lines) <= max_lines:
-            return font, lines
-    font = ImageFont.truetype(font_path, 23)
-    lines = _wrap_chars(draw, text, font, max_width)
-    visible = lines[:max_lines]
-    if len(lines) > max_lines:
-        visible[-1] = _truncate_line(draw, visible[-1], font, max_width)
-    return font, visible
-
-
 def _load_image(path):
     with Image.open(str(path)) as source:
         oriented = ImageOps.exif_transpose(source)
@@ -247,7 +207,6 @@ def compose_journal(
     name,
     personality,
     hobby,
-    lore,
     output_path,
     font_path=None,
 ):
@@ -295,30 +254,19 @@ def compose_journal(
     draw.text((1390, 82), "唤灵", font=label_font, fill=MUTED_INK)
     draw.line((1460, 103, 2268, 103), fill=LINE, width=2)
 
-    scene_box = (1380, 128, 2295, 955)
+    scene_box = (1380, 128, 2295, 1080)
     _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))
     draw = ImageDraw.Draw(canvas)
     _draw_sketch_rect(draw, scene_box, LINE, width=2, seed=43)
 
     name_font = _font_that_fits(draw, str(name), bold_font_path, 850, 78, 48)
-    draw.text((1390, 1005), str(name), font=name_font, fill=INK)
-    draw.line((1390, 1105, 2268, 1105), fill=ACCENT, width=4)
+    draw.text((1390, 1110), str(name), font=name_font, fill=INK)
+    draw.line((1390, 1208, 2268, 1208), fill=ACCENT, width=4)
 
     _draw_chip(
-        draw, (1390, 1140, 1815, 1210), "性格", personality, regular_font_path
+        draw, (1390, 1242, 1815, 1312), "性格", personality, regular_font_path
     )
-    _draw_chip(draw, (1843, 1140, 2268, 1210), "爱好", hobby, regular_font_path)
-
-    label_font = ImageFont.truetype(regular_font_path, 25)
-    draw.text((1390, 1250), "观察记录", font=label_font, fill=ACCENT)
-    lore_font, lore_lines = _fit_lore(
-        draw, lore, regular_font_path, 870, max_lines=2
-    )
-    y = 1298
-    for line in lore_lines:
-        draw.text((1390, y), line, font=lore_font, fill=INK)
-        bbox = _text_bbox(draw, line, lore_font)
-        y += (bbox[3] - bbox[1]) + 18
+    _draw_chip(draw, (1843, 1242, 2268, 1312), "爱好", hobby, regular_font_path)
 
     draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
     footer_font = ImageFont.truetype(regular_font_path, 21)
@@ -341,7 +289,6 @@ def parse_args(argv=None):
     parser.add_argument("--name", required=True, help="Original spirit name")
     parser.add_argument("--personality", required=True, help="Short personality phrase")
     parser.add_argument("--hobby", required=True, help="Short hobby phrase")
-    parser.add_argument("--lore", required=True, help="One behavioral lore sentence")
     parser.add_argument("--output", required=True, help="Requested .png output path")
     parser.add_argument("--font", help="Optional CJK .ttf/.ttc font path")
     return parser.parse_args(argv)
@@ -356,7 +303,6 @@ def main(argv=None):
             name=args.name,
             personality=args.personality,
             hobby=args.hobby,
-            lore=args.lore,
             output_path=args.output,
             font_path=args.font,
         )
