@@ -1,77 +1,98 @@
-# Art Direction and Creature Logic
+# Art Direction and 精灵 Logic
 
 Use this reference for every Huanling Journal generation.
 
-## Select the source object
+## Select and locate the source object
 
-When the user does not name an object, score visible candidates informally on four traits:
+Score candidates on silhouette, surface identity, structural hook, and creature potential. Prefer a distinctive object to generic sky, floor, wall, or shadow. Record:
 
-1. **Silhouette** — recognizable outline or proportion.
-2. **Surface identity** — distinctive palette, transparency, grain, petals, glaze, rust, or fibers.
-3. **Structural hook** — handle, stem, hinge, rim, thorn, crack, fold, cap, or repeating geometry.
-4. **Creature potential** — a plausible body plan, motion, defense, habit, or temperament suggested by the object.
-
-Choose the object with the strongest combined identity. Prefer a small distinctive object to a generic wall, floor, sky, or shadow.
+- Its relative region, such as `left foreground, about one third of image height`.
+- Its approximate scale relative to the frame.
+- Three nearby landmarks that make correspondence between A and B verifiable.
 
 ## Choose the archetype
 
-| Source cues | Archetype | Creature language |
+| Source cues | Archetype | 精灵 language |
 | --- | --- | --- |
 | Round, soft, small, smooth, pastel | `gentle` | compact proportions, open posture, curious or comforting behavior |
 | Thin, flexible, light, vertical, wind-shaped | `nimble` | lean body, quick feet or fins, alert pose, darting behavior |
 | Sharp, rough, heavy, angular, dark | `fierce` | grounded stance, defensive ridges, restrained strength, territorial behavior |
-| Layered, weathered, mechanical, architectural, unusually complex | `evolved-guardian` | mature proportions, integrated armor or crest, calm authority, rare-looking details |
+| Layered, weathered, mechanical, architectural, unusually complex | `evolved-guardian` | mature but simplified proportions, a clear crest or integrated protection, calm authority |
 
-Use the object rather than the desired mood as evidence. Avoid making every subject cute.
+Base the archetype on the object. Do not make every subject cute, and do not turn fierce or evolved subjects into realistic monsters.
 
 ## Preserve three cues
 
-Record and express all of the following:
+- **Silhouette:** preserve the cup flare, leaf arc, bottle neck, stone mass, branching crown, or another dominant outline.
+- **Color/material:** preserve glaze, glass, veins, rust, bark, fiber, petals, or another real surface identity as a simplified palette and texture.
+- **Structure:** turn one unmistakable part into anatomy, such as a handle becoming a tail, petals becoming a mane, or branches becoming sensory fins.
 
-- **Silhouette cue:** the overall cup flare, leaf arc, bottle neck, stone mass, and so on.
-- **Color/material cue:** ceramic glaze, translucent glass, leaf veins, oxidized metal, woven fiber, or another real surface identity.
-- **Structural cue:** convert one unmistakable part into anatomy, such as a handle becoming a curled tail, petals becoming a mane, or grass blades becoming sensory whiskers.
+Transform cues into coherent anatomy. Simplify aggressively enough to produce a readable collectible companion silhouette. Never leave the literal object intact and merely add eyes and limbs.
 
-Transform these cues into anatomy. Do not leave the original object intact and simply attach a face or legs.
+## Name the 精灵
 
-## Write the creature record
+For Chinese output:
 
-- Name: use 2–5 Chinese characters when writing Chinese. Combine material, behavior, habitat, sound, or shape; avoid existing franchise names.
-- Personality: use 2–6 Chinese characters and choose a specific contrast when useful, such as `胆小护短` or `慢热好奇`.
-- Hobby: use 4–10 Chinese characters and make it observable, such as `收集清晨露珠`.
-- Lore: write one sentence, normally 24–44 Chinese characters. Show character through a conditional habit, sensory reaction, defense, or small ecological effect. Do not use combat statistics, rarity labels, elemental type systems, or copied card language.
+1. Extract roots from shape, material, motion, sound, habitat, and temperament.
+2. Generate exactly five 2-4-character candidates using different combinations of those roots.
+3. Reject automatic names ending in `兽` or `精灵`, exact names of recognizable existing characters, brand names, and near-copies that differ by only one character.
+4. Prefer the candidate with the strongest rhythm, memorability, temperament fit, and traceable connection to the object.
+5. Honor a user-supplied name even when it does not follow the automatic naming pattern.
 
-Example structure only: `受惊时，它会把杯沿般的耳翼合拢，让积存的雨声在壳中滚成低低的警告。`
+Good pattern examples are `苔角`, `茶咕`, `巡梢`, and `露芽`; treat them as structural examples, not reserved outputs.
 
-## Build the image prompt
+## Write the record
 
-Use this labeled scaffold and replace every bracketed value:
+- Personality: 2-6 Chinese characters with a specific contrast when useful, such as `胆小护短`.
+- Hobby: 4-10 Chinese characters describing observable behavior.
+- Lore: one original behavioral sentence, normally 24-44 Chinese characters. Use a reaction, habit, defense, or ecological effect. Do not use battle statistics, rarity labels, type systems, or copied card language.
+
+## Visual language
+
+Aim for the environmental storytelling and strong focal hierarchy of a collectible creature-card illustration, not its branded card frame.
+
+- **Character design:** clear animated silhouette, readable facial expression, simplified anatomy, appealing companion proportions appropriate to the archetype.
+- **Medium:** bright opaque gouache with colored-pencil construction, accents, and hatching on visible paper tooth.
+- **Edges:** no thick black outline. Separate forms with dark colored pencil, adjacent color contrast, and simple light-shadow groups.
+- **Color:** luminous scene color, soft environmental hues, and a few saturated focal accents. Preserve dark source materials without allowing gray-brown to dominate the whole image.
+- **Surface:** dry-brush edges, small gaps, uneven fill, colored-pencil strokes, mild asymmetry, and human-looking corrections.
+- **Scene:** retain foreground, middle ground, background, viewpoint, and recognizable landmarks. Use wind, foliage, reflected light, or small environmental reactions to reveal the 精灵's behavior.
+
+Avoid photorealistic monsters, gloomy grading, heavy black contouring, 3D render, plastic gloss, airbrushed gradients, neon rim light, perfect symmetry, hyper-detailed armor, generic mascot design, or a location unrelated to the source.
+
+## Prompt 1: temporary 精灵 design
 
 ```text
 Use case: stylized-concept
-Asset type: original creature field-journal portrait
-Input images: Image 1 is a reference photo only, not an edit target
-Primary request: transform the visible [selected object] into one original living creature
-Subject: [archetype and body plan]; preserve [silhouette cue], [color/material cue], and [structural cue]
-Scene/backdrop: plain warm off-white sketchbook paper with faint natural tooth, no environment scene
-Style/medium: observational hand illustration; visible graphite underdrawing; colored pencil contours; translucent watercolor and light gouache; uneven human pressure; pigment pooling; a few imperfect edges and asymmetries
-Composition/framing: one creature only, full body or nearly full body, three-quarter view, centered with generous breathing room and a faint hand-painted grounding shadow
-Lighting/mood: soft neutral daylight; [temperament]
-Constraints: original design; the source photo remains unchanged; no literal intact object with limbs; no text, letters, numbers, symbols, logos, card frame, type icon, watermark, or franchise element
-Avoid: 3D render, plastic gloss, airbrushed gradients, neon rim light, perfect bilateral symmetry, hyper-detailed concept art, game UI, photorealism, generic anime mascot, AI gibberish
+Asset type: temporary original 精灵 identity reference
+Input images: Image 1 is a source-object reference only, not an edit target
+Primary request: transform the visible [selected object] into exactly one original collectible companion 精灵
+Subject: [archetype and simplified body plan]; preserve [silhouette cue], [color/material cue], and [structural cue]
+Scene/backdrop: simple warm light paper with no environment and no card layout
+Style/medium: bright opaque gouache, colored-pencil details and hatching, visible paper tooth, handmade irregularities, no thick black outline
+Composition/framing: one full-body 精灵, clear animated silhouette, expressive eyes and pose, generous breathing room
+Lighting/mood: bright natural light; [temperament]
+Constraints: original design; coherent anatomy; no literal intact object with limbs; no text, numbers, symbols, logos, card frame, property icon, watermark, or franchise element
+Avoid: realistic monster, gray-brown dominance, gloomy mood, 3D, plastic gloss, heavy black contour, generic anime mascot, existing character resemblance, AI gibberish
 ```
 
-Do not ask the image model to render the name or lore. The deterministic compositor owns typography.
+## Prompt 2: transformed scene B
 
-## Review the artwork
+```text
+Use case: compositing and style-transfer
+Asset type: text-free transformed-scene illustration for an A+B journal
+Input images: Image 1 is the source scene and composition/edit target for a new derivative output only; Image 2 is the exact 精灵 identity reference
+Primary request: repaint the complete source scene as a bright collectible creature-card illustration, remove [selected object], and place the same 精灵 from Image 2 at [source region]
+Scene: preserve the original camera viewpoint, aspect ratio, foreground/middle/background structure, and [three landmarks]; keep it recognizably the same location
+Subject placement: exactly one 精灵 at the original object's approximate position, scale, depth, orientation, and ground contact; the original object must be absent
+Style/medium: luminous colored gouache and colored pencil on subtly textured paper; loose environment strokes; crisp readable 精灵 details; no thick black outline
+Lighting/mood: retain the source time of day while making the palette bright, lively, and welcoming; show [behavior] through a small environmental reaction
+Constraints: maintain the exact identity, palette, and anatomy from Image 2; no text, letters, numbers, symbols, card frame, property icon, energy mark, statistics, logo, watermark, or existing franchise element
+Avoid: different location, moved landmarks, duplicate creature, remaining source object, gloomy gray cast, photorealism, 3D, plastic gloss, heavy black contour, branded trading-card UI, AI gibberish
+```
 
-Accept only when all statements are true:
+## Review both stages
 
-- Exactly one creature appears.
-- All three source cues remain legible.
-- The object has become anatomy instead of an object with pasted-on limbs.
-- Pencil, paper, and pigment artifacts are visible without making the image dirty.
-- The result is neither automatically cute nor exaggeratedly fierce; it matches the selected archetype.
-- No text, logo, watermark, trademarked character, card UI, or decorative symbol appears.
+Accept the temporary design only when exactly one original 精灵 appears, all three cues remain legible, the silhouette is simplified, the expression fits the archetype, and no forbidden content appears.
 
-If one condition fails, request one focused correction. Do not redesign unrelated successful parts.
+Accept B only when the same 精灵 appears once at the recorded source region, the original object is absent, the three landmarks and viewpoint remain recognizable, the scene is bright and layered, and no generated text or branded imagery appears. Request one focused correction for a failed condition without redesigning successful parts.

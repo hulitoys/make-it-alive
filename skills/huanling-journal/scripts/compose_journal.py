@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compose an untouched scene photo and a creature portrait into a journal spread."""
+"""Compose an untouched photo and its transformed scene into one journal spread."""
 
 from __future__ import print_function
 
@@ -18,13 +18,14 @@ except ImportError:
 
 
 CANVAS_SIZE = (2400, 1600)
-PAPER = (239, 229, 207)
-PAGE = (247, 239, 221)
-INK = (58, 52, 43)
-MUTED_INK = (106, 91, 70)
-ACCENT = (139, 72, 51)
-LINE = (166, 137, 100)
-PHOTO_MAT = (228, 216, 191)
+PAPER = (245, 239, 221)
+PAGE = (255, 251, 237)
+INK = (48, 55, 53)
+MUTED_INK = (73, 96, 92)
+ACCENT = (220, 91, 76)
+LINE = (82, 150, 143)
+PHOTO_MAT = (235, 229, 211)
+CHIP = (239, 231, 196)
 
 REGULAR_FONT_CANDIDATES = [
     r"C:\Windows\Fonts\msyh.ttc",
@@ -230,7 +231,7 @@ def _rounded_rectangle(draw, box, radius, fill, outline=None, width=1):
 
 
 def _draw_chip(draw, box, label, value, font_path):
-    _rounded_rectangle(draw, box, 24, (232, 220, 193), LINE, 2)
+    _rounded_rectangle(draw, box, 24, CHIP, LINE, 2)
     available = box[2] - box[0] - 34
     text = "{}｜{}".format(label, value)
     font = _font_that_fits(draw, text, font_path, available, 31, 22)
@@ -242,7 +243,7 @@ def _draw_chip(draw, box, label, value, font_path):
 
 def compose_journal(
     photo_path,
-    creature_path,
+    scene_path,
     name,
     personality,
     hobby,
@@ -251,19 +252,19 @@ def compose_journal(
     font_path=None,
 ):
     photo_path = Path(photo_path)
-    creature_path = Path(creature_path)
+    scene_path = Path(scene_path)
     output_path = Path(output_path)
 
     if not photo_path.is_file():
         raise FileNotFoundError("Photo not found: {}".format(photo_path))
-    if not creature_path.is_file():
-        raise FileNotFoundError("Creature artwork not found: {}".format(creature_path))
+    if not scene_path.is_file():
+        raise FileNotFoundError("Transformed scene not found: {}".format(scene_path))
     if output_path.suffix.lower() != ".png":
         raise ValueError("Output must use a .png extension.")
 
     regular_font_path, bold_font_path = resolve_fonts(font_path)
     photo = _load_image(photo_path)
-    creature = _load_image(creature_path)
+    scene = _load_image(scene_path)
 
     canvas = Image.new("RGBA", CANVAS_SIZE, PAPER + (255,))
     canvas = Image.alpha_composite(canvas, _paper_texture(CANVAS_SIZE))
@@ -282,19 +283,22 @@ def compose_journal(
     draw.line((1294, 65, 1294, 1538), fill=(112, 88, 59), width=3)
     draw.line((1305, 65, 1305, 1538), fill=(255, 250, 236), width=3)
 
-    photo_box = (110, 110, 1220, 1490)
+    label_font = ImageFont.truetype(regular_font_path, 27)
+    draw.text((110, 82), "原景", font=label_font, fill=MUTED_INK)
+    draw.line((180, 103, 1220, 103), fill=LINE, width=2)
+
+    photo_box = (110, 128, 1220, 1490)
     _paste_contained(canvas, photo, photo_box, PHOTO_MAT + (255,))
     draw = ImageDraw.Draw(canvas)
     _draw_sketch_rect(draw, photo_box, (91, 75, 54), width=3, seed=21)
 
-    header_font = ImageFont.truetype(regular_font_path, 29)
-    draw.text((1390, 84), "异兽观察手记", font=header_font, fill=MUTED_INK)
-    draw.line((1390, 121, 2268, 121), fill=LINE, width=2)
+    draw.text((1390, 82), "显灵现场", font=label_font, fill=MUTED_INK)
+    draw.line((1530, 103, 2268, 103), fill=LINE, width=2)
 
-    creature_box = (1380, 145, 2295, 955)
-    _paste_contained(canvas, creature, creature_box, (248, 242, 226, 255))
+    scene_box = (1380, 128, 2295, 955)
+    _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))
     draw = ImageDraw.Draw(canvas)
-    _draw_sketch_rect(draw, creature_box, LINE, width=2, seed=43)
+    _draw_sketch_rect(draw, scene_box, LINE, width=2, seed=43)
 
     name_font = _font_that_fits(draw, str(name), bold_font_path, 850, 78, 48)
     draw.text((1390, 1005), str(name), font=name_font, fill=INK)
@@ -319,7 +323,7 @@ def compose_journal(
     draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
     footer_font = ImageFont.truetype(regular_font_path, 21)
     draw.text(
-        (1390, 1486), "HUANLING · FIELD NOTE", font=footer_font, fill=MUTED_INK
+        (1390, 1486), "HUANLING · SCENE NOTE", font=footer_font, fill=MUTED_INK
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -330,11 +334,11 @@ def compose_journal(
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Compose a 2400x1600 Huanling creature journal spread."
+        description="Compose a 2400x1600 Huanling transformed-scene journal spread."
     )
     parser.add_argument("--photo", required=True, help="Untouched source scene photo")
-    parser.add_argument("--creature", required=True, help="Text-free creature artwork")
-    parser.add_argument("--name", required=True, help="Creature name")
+    parser.add_argument("--scene", required=True, help="Text-free transformed scene B")
+    parser.add_argument("--name", required=True, help="Original spirit name")
     parser.add_argument("--personality", required=True, help="Short personality phrase")
     parser.add_argument("--hobby", required=True, help="Short hobby phrase")
     parser.add_argument("--lore", required=True, help="One behavioral lore sentence")
@@ -348,7 +352,7 @@ def main(argv=None):
     try:
         final_path = compose_journal(
             photo_path=args.photo,
-            creature_path=args.creature,
+            scene_path=args.scene,
             name=args.name,
             personality=args.personality,
             hobby=args.hobby,

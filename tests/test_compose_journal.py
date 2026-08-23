@@ -49,9 +49,9 @@ class ComposeJournalTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        self.creature = self.root / "creature.png"
+        self.scene = self.root / "transformed-scene.png"
         make_fixture(
-            self.creature, (1024, 1024), (245, 236, 215), (73, 130, 105)
+            self.scene, (1200, 900), (143, 205, 224), (247, 139, 86)
         )
 
     def tearDown(self):
@@ -60,8 +60,8 @@ class ComposeJournalTests(unittest.TestCase):
     def compose(self, photo, output, lore=None, font_path=None):
         return COMPOSER.compose_journal(
             photo_path=photo,
-            creature_path=self.creature,
-            name="瓷眠兽",
+            scene_path=self.scene,
+            name="茶咕",
             personality="慢热好奇",
             hobby="收集清晨露珠",
             lore=lore
@@ -86,6 +86,20 @@ class ComposeJournalTests(unittest.TestCase):
                 with Image.open(str(result)) as final_image:
                     self.assertEqual(COMPOSER.CANVAS_SIZE, final_image.size)
                     self.assertEqual("PNG", final_image.format)
+
+    def test_containment_preserves_aspect_ratio_without_crop(self):
+        target = (1110, 1362)
+        for source in [(1600, 900), (900, 1600), (1024, 1024)]:
+            with self.subTest(source=source):
+                fitted = COMPOSER._fit_dimensions(source, target)
+                self.assertLessEqual(fitted[0], target[0])
+                self.assertLessEqual(fitted[1], target[1])
+                self.assertTrue(fitted[0] == target[0] or fitted[1] == target[1])
+                self.assertAlmostEqual(
+                    float(source[0]) / float(source[1]),
+                    float(fitted[0]) / float(fitted[1]),
+                    places=2,
+                )
 
     def test_existing_output_gets_versioned_name(self):
         photo = self.root / "photo.png"
@@ -114,6 +128,42 @@ class ComposeJournalTests(unittest.TestCase):
                 photo,
                 self.root / "missing-font.png",
                 font_path=str(self.root / "missing-font.ttf"),
+            )
+
+    def test_cli_interface_uses_scene_argument(self):
+        parsed = COMPOSER.parse_args(
+            [
+                "--photo",
+                "photo.png",
+                "--scene",
+                "scene.png",
+                "--name",
+                "茶咕",
+                "--personality",
+                "慢热好奇",
+                "--hobby",
+                "收集清晨露珠",
+                "--lore",
+                "风起时，它会把耳翼转向最先响起的窗沿。",
+                "--output",
+                "journal.png",
+            ]
+        )
+        self.assertEqual("scene.png", parsed.scene)
+        self.assertFalse(hasattr(parsed, "creature"))
+
+    def test_missing_scene_has_actionable_error(self):
+        photo = self.root / "photo.png"
+        make_fixture(photo, (900, 900), (120, 130, 150), (220, 190, 90))
+        with self.assertRaisesRegex(FileNotFoundError, "Transformed scene"):
+            COMPOSER.compose_journal(
+                photo_path=photo,
+                scene_path=self.root / "missing-scene.png",
+                name="茶咕",
+                personality="慢热好奇",
+                hobby="收集清晨露珠",
+                lore="风起时，它会把耳翼转向最先响起的窗沿。",
+                output_path=self.root / "missing-scene.png",
             )
 
 

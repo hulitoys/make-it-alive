@@ -1,4 +1,4 @@
 interface:
   display_name: "唤灵手账"
-  short_description: "把日常场景里的物件唤成低AI感的彩色手绘宠兽观察卡"
-  default_prompt: "使用 $huanling-journal 把我照片里的一个日常物体变成原创手绘宠兽，并与原照片排成观察手账。"
+  short_description: "把日常照片中的物件原地唤成明亮手绘卡牌场景精灵观察图"
+  default_prompt: "使用 $huanling-journal，把照片里的一个物件变成原创精灵，并生成原景与显灵现场的手账对照图。"
