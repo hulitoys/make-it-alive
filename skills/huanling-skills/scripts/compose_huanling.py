@@ -251,8 +251,8 @@ def compose_huanling(
     draw = ImageDraw.Draw(canvas)
     _draw_sketch_rect(draw, photo_box, (91, 75, 54), width=3, seed=21)
 
-    draw.text((1390, 82), "唤灵", font=label_font, fill=MUTED_INK)
-    draw.line((1460, 103, 2268, 103), fill=LINE, width=2)
+    draw.text((1390, 82), "Huanling", font=label_font, fill=MUTED_INK)
+    draw.line((1515, 103, 2268, 103), fill=LINE, width=2)
 
     scene_box = (1380, 128, 2295, 1080)
     _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))

@@ -1,6 +1,6 @@
 ---
 name: huanling-skills
-description: Turn one visible object in a user-provided everyday photo into an original collectible-style 精灵, repaint the same scene with the 精灵 replacing that object in place, and compose the untouched photo beside the bright hand-painted transformation scene. Use when the user asks to 唤灵, create a 精灵 from a photographed cup, plant, grass, stone, tool, or other visible object, or make an original creature-card-like scene without copying any existing franchise. Select one object automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
+description: Turn one visible object in a user-provided everyday photo into an original collectible-style 精灵, repaint the same scene with the 精灵 replacing that object in place, and compose the untouched photo beside the bright hand-painted transformation scene. Use when the user asks for Huanling, creates a 精灵 from a photographed cup, plant, grass, stone, tool, or other visible object, or requests an original creature-card-like scene without copying any existing franchise. Select one object automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
 ---
 
 # Huanling Skills
