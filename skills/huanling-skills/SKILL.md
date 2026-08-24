@@ -1,5 +1,5 @@
 ---
-name: huanling-journal
+name: huanling-skills
 description: Turn one visible object in a user-provided everyday photo into an original collectible-style 精灵, repaint the same scene with the 精灵 replacing that object in place, and compose the untouched photo beside the bright hand-painted transformation scene. Use when the user asks to 唤灵, create a 精灵 from a photographed cup, plant, grass, stone, tool, or other visible object, or make an original creature-card-like scene without copying any existing franchise. Select one object automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
 ---
 
@@ -56,13 +56,13 @@ Create one original 精灵 from one visible everyday object. Show the untouched 
    - Resolve the skill directory to an absolute path and quote all arguments:
 
      ```text
-     python <skill-dir>/scripts/compose_journal.py \
+     python <skill-dir>/scripts/compose_huanling.py \
        --photo <source-photo-A> \
        --scene <transformed-scene-B> \
        --name <name> \
        --personality <personality> \
        --hobby <hobby> \
-       --output output/huanling-journal/<name>-journal.png
+       --output output/huanling-skills/<name>-huanling.png
      ```
 
    - The script applies EXIF display orientation and proportional containment. It never writes to A and never crops or overlays A.

@@ -70,7 +70,7 @@ Avoid photorealistic monsters, gloomy grading, heavy black contouring, 3D render
 
 ```text
 Use case: single-call image-to-image transformation
-Asset type: text-free transformed-scene illustration for an A+B journal
+Asset type: text-free transformed-scene illustration for an A+B comparison image
 Input images: Image 1 is the source scene and composition/edit target for a new derivative output only
 Primary request: repaint the complete source scene as a bright collectible creature-card illustration, remove [selected object], and replace it in place with exactly one original [archetype] 精灵
 Subject design: simplify [silhouette cue], [color/material cue], and [structural cue] into coherent anatomy, a clear animated silhouette, an expressive face, and a pose showing [hobby or other concrete behavior]

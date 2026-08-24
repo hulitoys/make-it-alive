@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compose an untouched photo and its transformed scene into one journal spread."""
+"""Compose an untouched photo and its transformed scene into one Huanling spread."""
 
 from __future__ import print_function
 
@@ -201,7 +201,7 @@ def _draw_chip(draw, box, label, value, font_path):
     draw.text((box[0] + 17, y), text, font=font, fill=MUTED_INK)
 
 
-def compose_journal(
+def compose_huanling(
     photo_path,
     scene_path,
     name,
@@ -282,7 +282,7 @@ def compose_journal(
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Compose a 2400x1600 Huanling transformed-scene journal spread."
+        description="Compose a 2400x1600 Huanling transformed-scene spread."
     )
     parser.add_argument("--photo", required=True, help="Untouched source scene photo")
     parser.add_argument("--scene", required=True, help="Text-free transformed scene B")
@@ -297,7 +297,7 @@ def parse_args(argv=None):
 def main(argv=None):
     args = parse_args(argv)
     try:
-        final_path = compose_journal(
+        final_path = compose_huanling(
             photo_path=args.photo,
             scene_path=args.scene,
             name=args.name,

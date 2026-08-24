@@ -18,13 +18,13 @@
 在 Codex 中使用 `$skill-installer`，让它从下面的 Skill 路径安装：
 
 ```text
-https://github.com/hulitoys/huanling-skills/tree/main/skills/huanling-journal
+https://github.com/hulitoys/huanling-skills/tree/main/skills/huanling-skills
 ```
 
-也可以把 `skills/huanling-journal` 复制到个人 Skill 目录：
+也可以把 `skills/huanling-skills` 复制到个人 Skill 目录：
 
 ```text
-$HOME/.agents/skills/huanling-journal
+$HOME/.agents/skills/huanling-skills
 ```
 
 ## 使用
@@ -32,13 +32,13 @@ $HOME/.agents/skills/huanling-journal
 附上一张日常场景照片，然后输入：
 
 ```text
-使用 $huanling-journal，把这张照片里的一个物体原地唤成精灵。
+使用 $huanling-skills，把这张照片里的一个物体原地唤成精灵。
 ```
 
 也可以指定物体：
 
 ```text
-使用 $huanling-journal，把照片里的蓝色水杯原地变成一只精灵。
+使用 $huanling-skills，把照片里的蓝色水杯原地变成一只精灵。
 ```
 
 Skill 在 Codex 中默认使用内置 ImageGen，不需要 API Key。其他智能体需要具备等价的单次图生图能力，并能执行 Python/Pillow 排版脚本；GitHub 上的 Skill 本身不包含图片模型。脚本会自动寻找微软雅黑、苹方、Noto CJK 等中文字体，也可以用 `--font` 指定字体。

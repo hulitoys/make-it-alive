@@ -10,8 +10,8 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "huanling-journal" / "scripts" / "compose_journal.py"
-SPEC = importlib.util.spec_from_file_location("compose_journal", str(SCRIPT))
+SCRIPT = ROOT / "skills" / "huanling-skills" / "scripts" / "compose_huanling.py"
+SPEC = importlib.util.spec_from_file_location("compose_huanling", str(SCRIPT))
 COMPOSER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(COMPOSER)
 
@@ -45,7 +45,7 @@ def make_fixture(path, size, base, accent):
     image.save(str(path), format="PNG")
 
 
-class ComposeJournalTests(unittest.TestCase):
+class ComposeHuanlingTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
@@ -58,7 +58,7 @@ class ComposeJournalTests(unittest.TestCase):
         self.temp.cleanup()
 
     def compose(self, photo, output, font_path=None):
-        return COMPOSER.compose_journal(
+        return COMPOSER.compose_huanling(
             photo_path=photo,
             scene_path=self.scene,
             name="茶咕",
@@ -76,7 +76,7 @@ class ComposeJournalTests(unittest.TestCase):
                 make_fixture(photo, size, (92, 139, 179), (250, 204, 96))
                 before = file_hash(photo)
                 result = self.compose(
-                    photo, self.root / "journal-{}.png".format(index)
+                    photo, self.root / "huanling-{}.png".format(index)
                 )
                 after = file_hash(photo)
                 self.assertEqual(before, after)
@@ -101,12 +101,12 @@ class ComposeJournalTests(unittest.TestCase):
 
     def test_existing_output_gets_versioned_name(self):
         photo = self.root / "photo.png"
-        output = self.root / "journal.png"
+        output = self.root / "huanling.png"
         make_fixture(photo, (1200, 900), (120, 150, 110), (235, 190, 95))
         first = self.compose(photo, output)
         second = self.compose(photo, output)
-        self.assertEqual("journal.png", first.name)
-        self.assertEqual("journal-v2.png", second.name)
+        self.assertEqual("huanling.png", first.name)
+        self.assertEqual("huanling-v2.png", second.name)
 
     def test_missing_explicit_font_has_actionable_error(self):
         photo = self.root / "photo.png"
@@ -132,7 +132,7 @@ class ComposeJournalTests(unittest.TestCase):
                 "--hobby",
                 "收集清晨露珠",
                 "--output",
-                "journal.png",
+                "huanling.png",
             ]
         )
         self.assertEqual("scene.png", parsed.scene)
@@ -143,7 +143,7 @@ class ComposeJournalTests(unittest.TestCase):
         photo = self.root / "photo.png"
         make_fixture(photo, (900, 900), (120, 130, 150), (220, 190, 90))
         with self.assertRaisesRegex(FileNotFoundError, "Transformed scene"):
-            COMPOSER.compose_journal(
+            COMPOSER.compose_huanling(
                 photo_path=photo,
                 scene_path=self.root / "missing-scene.png",
                 name="茶咕",

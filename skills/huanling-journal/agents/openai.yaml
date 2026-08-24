@@ -1,4 +1,0 @@
-interface:
-  display_name: "幻灵 Skills"
-  short_description: "幻灵 Skills：把日常照片中的物件原地变成明亮手绘场景精灵"
-  default_prompt: "使用 $huanling-journal，把照片里的一个物件变成原创精灵，并生成标注为‘原景’和‘唤灵’的对照图。"
