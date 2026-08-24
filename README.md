@@ -1,30 +1,30 @@
-# Huanling Skills
+# Make It Alive
 
-Huanling Skills 把日常照片里的水杯、花草、石头或其他物件原地变成原创精灵，并把未经修改的原景与同场景插画排成一页观察图。
+Make It Alive 把日常照片里的水杯、花草、石头或其他物件原地变成原创精灵，并把未经修改的原景与同场景插画排成一页观察图。
 
 ## 它会做什么
 
 - 自动选择照片中最有辨识度和精灵化潜力的一个物体，也支持你直接点名。
 - 保留原物体的轮廓、色彩或材质、结构细节，再将它们简化成清楚的精灵身体语言。
 - 自动生成五个原创混成名候选，默认不使用“××兽”或“××精灵”格式。
-- 默认只调用一次图片生成：在同一轮里完成精灵设计、移除原物和原位替换，生成保持原视角与场景地标的 Huanling 插画。
+- 默认只调用一次图片生成：在同一轮里完成精灵设计、移除原物和原位替换，生成保持原视角与场景地标的 Make It Alive 插画。
 - 使用明亮水粉、彩铅和卡牌插画般的环境叙事，避免粗黑描边、阴郁灰调、塑料 3D 和过度精修。
 - 用确定性脚本排出准确中文；只保留名字、自然口语的性格和可观察的爱好，不再生成“观察记录”。
 
-最终只展示一张 2400×1600 PNG：左侧为完整原照片 A，右侧为同场景 Huanling 插画 B、名字、性格和爱好。
+最终只展示一张 2400×1600 PNG：左侧为完整原照片 A，右侧为同场景 Make It Alive 插画 B、名字、性格和爱好。
 
 ## 安装
 
 在 Codex 中使用 `$skill-installer`，让它从下面的 Skill 路径安装：
 
 ```text
-https://github.com/hulitoys/huanling-skills/tree/main/skills/huanling-skills
+https://github.com/hulitoys/make-it-alive/tree/main/skills/make-it-alive
 ```
 
-也可以把 `skills/huanling-skills` 复制到个人 Skill 目录：
+也可以把 `skills/make-it-alive` 复制到个人 Skill 目录：
 
 ```text
-$HOME/.agents/skills/huanling-skills
+$HOME/.agents/skills/make-it-alive
 ```
 
 ## 使用
@@ -32,13 +32,13 @@ $HOME/.agents/skills/huanling-skills
 附上一张日常场景照片，然后输入：
 
 ```text
-使用 $huanling-skills，把这张照片里的一个物体原地唤成精灵。
+使用 $make-it-alive，把这张照片里的一个物体原地变成精灵。
 ```
 
 也可以指定物体：
 
 ```text
-使用 $huanling-skills，把照片里的蓝色水杯原地变成一只精灵。
+使用 $make-it-alive，把照片里的蓝色水杯原地变成一只精灵。
 ```
 
 Skill 在 Codex 中默认使用内置 ImageGen，不需要 API Key。其他智能体需要具备等价的单次图生图能力，并能执行 Python/Pillow 排版脚本；GitHub 上的 Skill 本身不包含图片模型。脚本会自动寻找微软雅黑、苹方、Noto CJK 等中文字体，也可以用 `--font` 指定字体。

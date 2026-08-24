@@ -1,6 +1,6 @@
 # Art Direction and 精灵 Logic
 
-Use this reference for every Huanling Skills generation.
+Use this reference for every Make It Alive generation.
 
 ## Select and locate the source object
 

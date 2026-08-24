@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make It Alive"
+  short_description: "Make It Alive：把日常照片中的物件原地变成明亮手绘场景精灵"
+  default_prompt: "使用 $make-it-alive，把照片里的一个物件变成原创精灵，并生成标注为‘原景’和‘Make It Alive’的对照图。"

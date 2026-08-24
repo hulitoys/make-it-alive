@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compose an untouched photo and its transformed scene into one Huanling spread."""
+"""Compose an untouched photo and its transformed scene into one Make It Alive spread."""
 
 from __future__ import print_function
 
@@ -201,7 +201,7 @@ def _draw_chip(draw, box, label, value, font_path):
     draw.text((box[0] + 17, y), text, font=font, fill=MUTED_INK)
 
 
-def compose_huanling(
+def compose_make_it_alive(
     photo_path,
     scene_path,
     name,
@@ -251,8 +251,8 @@ def compose_huanling(
     draw = ImageDraw.Draw(canvas)
     _draw_sketch_rect(draw, photo_box, (91, 75, 54), width=3, seed=21)
 
-    draw.text((1390, 82), "Huanling", font=label_font, fill=MUTED_INK)
-    draw.line((1515, 103, 2268, 103), fill=LINE, width=2)
+    draw.text((1390, 82), "Make It Alive", font=label_font, fill=MUTED_INK)
+    draw.line((1570, 103, 2268, 103), fill=LINE, width=2)
 
     scene_box = (1380, 128, 2295, 1080)
     _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))
@@ -271,7 +271,7 @@ def compose_huanling(
     draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
     footer_font = ImageFont.truetype(regular_font_path, 21)
     draw.text(
-        (1390, 1486), "HUANLING · SKILLS", font=footer_font, fill=MUTED_INK
+        (1390, 1486), "MAKE IT ALIVE", font=footer_font, fill=MUTED_INK
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -282,7 +282,7 @@ def compose_huanling(
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Compose a 2400x1600 Huanling transformed-scene spread."
+        description="Compose a 2400x1600 Make It Alive transformed-scene spread."
     )
     parser.add_argument("--photo", required=True, help="Untouched source scene photo")
     parser.add_argument("--scene", required=True, help="Text-free transformed scene B")
@@ -297,7 +297,7 @@ def parse_args(argv=None):
 def main(argv=None):
     args = parse_args(argv)
     try:
-        final_path = compose_huanling(
+        final_path = compose_make_it_alive(
             photo_path=args.photo,
             scene_path=args.scene,
             name=args.name,
