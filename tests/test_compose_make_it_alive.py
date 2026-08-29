@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,13 +57,15 @@ class ComposeMakeItAliveTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def compose(self, photo, output, font_path=None):
+    def compose(self, photo, output, font_path=None, intro=None):
         return COMPOSER.compose_make_it_alive(
             photo_path=photo,
             scene_path=self.scene,
             name="茶咕",
             personality="慢热好奇",
             hobby="收集清晨露珠",
+            intro=intro
+            or "有人靠近时，它会先躲到杯柄后面，确认安全才慢慢探出头。",
             output_path=output,
             font_path=font_path,
         )
@@ -131,13 +133,66 @@ class ComposeMakeItAliveTests(unittest.TestCase):
                 "慢热好奇",
                 "--hobby",
                 "收集清晨露珠",
+                "--intro",
+                "怕冷时会把自己埋进纸巾里，只露出两只耳朵听房间里的动静。",
                 "--output",
                 "make-it-alive.png",
             ]
         )
         self.assertEqual("scene.png", parsed.scene)
+        self.assertTrue(parsed.intro.startswith("怕冷时"))
         self.assertFalse(hasattr(parsed, "creature"))
-        self.assertFalse(hasattr(parsed, "lore"))
+
+    def test_lore_alias_maps_to_intro_for_compatibility(self):
+        parsed = COMPOSER.parse_args(
+            [
+                "--photo",
+                "photo.png",
+                "--scene",
+                "scene.png",
+                "--name",
+                "茶咕",
+                "--personality",
+                "慢热好奇",
+                "--hobby",
+                "收集清晨露珠",
+                "--lore",
+                "紧张时会缩进杯口，只留一双眼睛观察周围。",
+                "--output",
+                "make-it-alive.png",
+            ]
+        )
+        self.assertEqual(
+            "紧张时会缩进杯口，只留一双眼睛观察周围。", parsed.intro
+        )
+
+    def test_small_intro_is_rendered_in_the_final_spread(self):
+        photo = self.root / "photo.png"
+        make_fixture(photo, (1200, 900), (120, 150, 110), (235, 190, 95))
+        first = self.compose(
+            photo,
+            self.root / "intro-a.png",
+            intro="怕冷时会钻进纸巾下面，只露出一双耳朵听门外的声音。",
+        )
+        second = self.compose(
+            photo,
+            self.root / "intro-b.png",
+            intro="晒够太阳以后，它会沿着桌边慢慢巡一圈，再回到原位。",
+        )
+        with Image.open(str(first)) as first_image, Image.open(
+            str(second)
+        ) as second_image:
+            first_region = first_image.crop((1390, 1325, 2268, 1455))
+            second_region = second_image.crop((1390, 1325, 2268, 1455))
+            self.assertIsNotNone(
+                ImageChops.difference(first_region, second_region).getbbox()
+            )
+
+    def test_empty_intro_is_rejected(self):
+        photo = self.root / "photo.png"
+        make_fixture(photo, (900, 900), (120, 130, 150), (220, 190, 90))
+        with self.assertRaisesRegex(ValueError, "Introduction must not be empty"):
+            self.compose(photo, self.root / "empty-intro.png", intro="   ")
 
     def test_missing_scene_has_actionable_error(self):
         photo = self.root / "photo.png"
@@ -149,6 +204,7 @@ class ComposeMakeItAliveTests(unittest.TestCase):
                 name="茶咕",
                 personality="慢热好奇",
                 hobby="收集清晨露珠",
+                intro="怕冷时会钻进纸巾下面，只露出一双耳朵听门外的声音。",
                 output_path=self.root / "missing-scene.png",
             )
 

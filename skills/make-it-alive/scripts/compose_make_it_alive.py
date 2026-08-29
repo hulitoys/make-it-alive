@@ -113,6 +113,41 @@ def _font_that_fits(draw, text, font_path, max_width, start_size, min_size):
     return ImageFont.truetype(font_path, min_size)
 
 
+def _required_text(value, label):
+    normalized = " ".join(str(value).split())
+    if not normalized:
+        raise ValueError("{} must not be empty.".format(label))
+    return normalized
+
+
+def _wrap_text(draw, text, font, max_width):
+    lines = []
+    current = ""
+    for character in text:
+        candidate = current + character
+        if not current or _text_width(draw, candidate, font) <= max_width:
+            current = candidate
+            continue
+        lines.append(current.strip())
+        current = character.lstrip()
+    if current:
+        lines.append(current.strip())
+    return [line for line in lines if line]
+
+
+def _wrapped_font_that_fits(
+    draw, text, font_path, max_width, max_lines, start_size, min_size
+):
+    for size in range(start_size, min_size - 1, -1):
+        font = ImageFont.truetype(font_path, size)
+        lines = _wrap_text(draw, text, font, max_width)
+        if len(lines) <= max_lines:
+            return font, lines
+    raise ValueError(
+        "Introduction is too long for the two-line layout. Shorten --intro and rerun."
+    )
+
+
 def _load_image(path):
     with Image.open(str(path)) as source:
         oriented = ImageOps.exif_transpose(source)
@@ -207,6 +242,7 @@ def compose_make_it_alive(
     name,
     personality,
     hobby,
+    intro,
     output_path,
     font_path=None,
 ):
@@ -220,6 +256,11 @@ def compose_make_it_alive(
         raise FileNotFoundError("Transformed scene not found: {}".format(scene_path))
     if output_path.suffix.lower() != ".png":
         raise ValueError("Output must use a .png extension.")
+
+    name = _required_text(name, "Name")
+    personality = _required_text(personality, "Personality")
+    hobby = _required_text(hobby, "Hobby")
+    intro = _required_text(intro, "Introduction")
 
     regular_font_path, bold_font_path = resolve_fonts(font_path)
     photo = _load_image(photo_path)
@@ -261,12 +302,28 @@ def compose_make_it_alive(
 
     name_font = _font_that_fits(draw, str(name), bold_font_path, 850, 78, 48)
     draw.text((1390, 1110), str(name), font=name_font, fill=INK)
-    draw.line((1390, 1208, 2268, 1208), fill=ACCENT, width=4)
+    draw.line((1390, 1200, 2268, 1200), fill=ACCENT, width=4)
 
     _draw_chip(
-        draw, (1390, 1242, 1815, 1312), "性格", personality, regular_font_path
+        draw, (1390, 1228, 1815, 1298), "性格", personality, regular_font_path
     )
-    _draw_chip(draw, (1843, 1242, 2268, 1312), "爱好", hobby, regular_font_path)
+    _draw_chip(draw, (1843, 1228, 2268, 1298), "爱好", hobby, regular_font_path)
+
+    intro_font, intro_lines = _wrapped_font_that_fits(
+        draw,
+        intro,
+        regular_font_path,
+        max_width=878,
+        max_lines=2,
+        start_size=26,
+        min_size=21,
+    )
+    intro_y = 1340
+    intro_box = _text_bbox(draw, "示例Ag", intro_font)
+    intro_line_height = intro_box[3] - intro_box[1] + 12
+    for line in intro_lines:
+        draw.text((1390, intro_y), line, font=intro_font, fill=MUTED_INK)
+        intro_y += intro_line_height
 
     draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
     footer_font = ImageFont.truetype(regular_font_path, 21)
@@ -289,6 +346,13 @@ def parse_args(argv=None):
     parser.add_argument("--name", required=True, help="Original spirit name")
     parser.add_argument("--personality", required=True, help="Short personality phrase")
     parser.add_argument("--hobby", required=True, help="Short hobby phrase")
+    parser.add_argument(
+        "--intro",
+        "--lore",
+        dest="intro",
+        required=True,
+        help="Small unlabelled natural-language introduction sentence",
+    )
     parser.add_argument("--output", required=True, help="Requested .png output path")
     parser.add_argument("--font", help="Optional CJK .ttf/.ttc font path")
     return parser.parse_args(argv)
@@ -303,6 +367,7 @@ def main(argv=None):
             name=args.name,
             personality=args.personality,
             hobby=args.hobby,
+            intro=args.intro,
             output_path=args.output,
             font_path=args.font,
         )
