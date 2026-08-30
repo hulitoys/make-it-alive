@@ -43,21 +43,16 @@ Good pattern examples are `苔角`, `茶咕`, `巡梢`, and `露芽`; treat them
 
 ## Write the record
 
-- **Personality:** use 2-6 plain Chinese characters that a person would naturally use to describe temperament, such as `温和警觉`, `胆小护短`, or `外冷内热`. Do not invent poetic labels that need explanation.
-- **Hobby:** use 4-10 Chinese characters as a concrete, repeatable verb-object activity that an observer could actually see, such as `收集落叶`, `给幼鸟挡风`, or `趴在窗边晒太阳`. Do not write vague metaphors such as `替风整理树冠`, `收藏月光`, or `梳理回声`.
-- **Introduction:** write one original 24-44-character Chinese sentence. It must describe a physically possible habit or reaction that reveals personality through visible behavior. Write ordinary natural Chinese, not pseudo-poetic setting copy. The final layout shows this sentence as small text without an `观察记录`, `简介`, or other heading.
+- **Personality:** use 2-6 plain Chinese characters that a person would naturally use to describe temperament. Do not invent poetic labels that need explanation.
+- **Hobby:** use 4-10 Chinese characters as a concrete, repeatable verb-object activity that an observer could actually see. Avoid vague or decorative metaphors.
+- **Introduction:** write one original 24-44-character Chinese sentence. It must describe a coherent habit or reaction that reveals personality through visible behavior. Write ordinary natural Chinese, not pseudo-poetic setting copy. The final layout shows this sentence as small text without an `观察记录`, `简介`, or other heading.
 
 Use these checks before accepting personality, hobby, or introduction:
 
-1. **Literal paraphrase:** can an ordinary reader restate the sentence without guessing what the metaphor means?
-2. **Physical possibility:** are the subject, verb, and object compatible in the real scene? A creature may lead a lost bird into shade; it cannot put `鸟鸣`—a sound—into a shadow.
-3. **Read-aloud test:** does it sound like natural spoken Chinese after one reading?
+1. **Spoken naturalness:** read it aloud once. It should sound like ordinary, fluent Chinese without forced wording, unexplained metaphor, or ambiguity.
+2. **Logical coherence:** the subject, action, object, and causal relationship must fit together. An ordinary reader should understand what happens without inventing a missing premise or correcting a category mistake.
 
-Reject hobby `替风整理树冠`; use `给幼鸟挡风` or `抖落树冠枯叶`.
-
-Good introduction patterns include `怕冷时会把自己埋进纸巾里，只露出两只耳朵听房间里的动静。` and `有人靠近时，它会先躲到花盆后面，确认安全才慢慢探出头。` Use them only as structural examples, not reusable stock copy.
-
-Reject surreal statements that treat a sound, light, mood, season, or memory as a physical object unless the sentence states a clear fantasy mechanism that an ordinary reader can immediately picture. Prefer a simple visible action over decorative language.
+If either check fails, rewrite the field in simpler, more direct language before composition.
 
 ## Visual language
 

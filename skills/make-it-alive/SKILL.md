@@ -50,10 +50,10 @@ Create one original 精灵 from one visible everyday object in each input photo.
    name: <selected 2-4-character Chinese name, or compact localized name>
    personality: <2-6 plain Chinese characters>
    hobby: <4-10-character observable verb-object activity>
-   intro: <24-44-character natural, physically possible introduction sentence>
+   intro: <24-44-character natural, logically coherent introduction sentence>
    ```
 
-   - Run the reference's literal-paraphrase, physical-possibility, and read-aloud checks on personality, hobby, and intro. Rewrite any field that depends on an unexplained metaphor, makes an impossible object act on an abstract sound or feeling, or describes an action an observer could not actually see.
+   - Run the reference's spoken-naturalness and logical-coherence checks on personality, hobby, and intro. Rewrite any field that sounds unnatural when read aloud or whose subject, action, object, or causal relationship does not make sense.
 
 5. Generate one transformed scene B per photo in one fast-path call each.
    - In Codex, use built-in `image_gen`. On another agent runtime, use its equivalent single-call image-to-image capability only when available. Do not switch to a paid API or CLI without explicit user approval.
@@ -96,7 +96,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
 - If generated art contains text or protected brand elements, regenerate instead of covering them.
 - If the transformed scene cannot preserve the location after one correction, explain the mismatch rather than claiming exact correspondence.
 - If composition fails, preserve all inputs and rerun only the deterministic composition step.
-- If any required text field is missing, unnatural, impossible to picture literally, or clipped, fix it and recompose before delivery.
+- If any required text field is missing, unnatural when read aloud, logically incoherent, or clipped, fix it and recompose before delivery.
 
 ## Speed Target
 
