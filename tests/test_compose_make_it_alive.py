@@ -120,6 +120,37 @@ class ComposeMakeItAliveTests(unittest.TestCase):
                 font_path=str(self.root / "missing-font.ttf"),
             )
 
+    def test_bundled_cjk_font_is_the_default(self):
+        regular, bold = COMPOSER.resolve_fonts()
+        self.assertEqual(COMPOSER.BUNDLED_FONT.resolve(), Path(regular).resolve())
+        self.assertEqual(COMPOSER.BUNDLED_FONT.resolve(), Path(bold).resolve())
+        self.assertTrue(COMPOSER.BUNDLED_FONT.is_file())
+
+    def test_bundled_font_license_is_packaged(self):
+        license_path = COMPOSER.BUNDLED_FONT.with_name("OFL.txt")
+        self.assertTrue(license_path.is_file())
+        self.assertIn("SIL OPEN FONT LICENSE", license_path.read_text(encoding="utf-8"))
+
+    def test_intro_wrap_does_not_orphan_chinese_punctuation(self):
+        image = Image.new("RGB", (1000, 200), "white")
+        draw = ImageDraw.Draw(image)
+        font, lines = COMPOSER._wrapped_font_that_fits(
+            draw,
+            "它最喜欢在午后的阳光里把纸巾铺平，听见脚步声就立刻钻回柔软的褶皱里。",
+            str(COMPOSER.BUNDLED_FONT),
+            max_width=878,
+            max_lines=2,
+            start_size=26,
+            min_size=21,
+        )
+        self.assertIsNotNone(font)
+        self.assertFalse(
+            any(
+                line and line[0] in COMPOSER.CLOSING_PUNCTUATION
+                for line in lines[1:]
+            )
+        )
+
     def test_cli_interface_uses_scene_argument(self):
         parsed = COMPOSER.parse_args(
             [

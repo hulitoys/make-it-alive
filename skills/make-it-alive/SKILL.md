@@ -79,7 +79,8 @@ Create one original 精灵 from one visible everyday object in each input photo.
      ```
 
    - The script applies EXIF display orientation and proportional containment. It never writes to A and never crops or overlays A.
-   - If Pillow is unavailable, report that it is required and ask before installing it. If no CJK font is found, request a font path and rerun with `--font <path>`.
+   - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default and falls back to a system CJK font only if the bundled asset is absent. Do not pause to ask the user to upload or download a font. `--font <path>` remains an optional explicit override.
+   - If Pillow is unavailable, report that it is required and ask before installing it. If the bundled font is missing from an incomplete installation and no system fallback exists, ask the user to reinstall the complete Skill rather than fetching a font during the task.
 
 7. Validate and deliver only the finished spread or spreads.
    - Inspect every final spread with `view_image`.

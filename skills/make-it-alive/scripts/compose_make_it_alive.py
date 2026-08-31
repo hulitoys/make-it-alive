@@ -27,6 +27,10 @@ LINE = (82, 150, 143)
 PHOTO_MAT = (235, 229, 211)
 CHIP = (239, 231, 196)
 
+SKILL_DIR = Path(__file__).resolve().parents[1]
+BUNDLED_FONT = SKILL_DIR / "assets" / "fonts" / "NotoSansCJKsc-Regular.otf"
+CLOSING_PUNCTUATION = frozenset("，。！？；：、）】》」』…")
+
 REGULAR_FONT_CANDIDATES = [
     r"C:\Windows\Fonts\msyh.ttc",
     r"C:\Windows\Fonts\simkai.ttf",
@@ -71,11 +75,16 @@ def resolve_fonts(explicit_font=None):
             )
         return explicit_font, explicit_font
 
+    if BUNDLED_FONT.is_file():
+        bundled = str(BUNDLED_FONT)
+        return bundled, bundled
+
     regular = _existing_font(REGULAR_FONT_CANDIDATES)
     bold = _existing_font(BOLD_FONT_CANDIDATES) or regular
     if not regular:
         raise FileNotFoundError(
-            "No CJK font was found. Rerun with --font <path-to-CJK-font>."
+            "The bundled CJK font is missing and no system fallback was found. "
+            "Reinstall the complete Skill or rerun with --font <path-to-CJK-font>."
         )
     return regular, bold
 
@@ -141,7 +150,10 @@ def _wrapped_font_that_fits(
     for size in range(start_size, min_size - 1, -1):
         font = ImageFont.truetype(font_path, size)
         lines = _wrap_text(draw, text, font, max_width)
-        if len(lines) <= max_lines:
+        has_orphaned_punctuation = any(
+            line and line[0] in CLOSING_PUNCTUATION for line in lines[1:]
+        )
+        if len(lines) <= max_lines and not has_orphaned_punctuation:
             return font, lines
     raise ValueError(
         "Introduction is too long for the two-line layout. Shorten --intro and rerun."
@@ -301,7 +313,7 @@ def compose_make_it_alive(
     _draw_sketch_rect(draw, scene_box, LINE, width=2, seed=43)
 
     name_font = _font_that_fits(draw, str(name), bold_font_path, 850, 78, 48)
-    draw.text((1390, 1110), str(name), font=name_font, fill=INK)
+    draw.text((1390, 1088), str(name), font=name_font, fill=INK)
     draw.line((1390, 1200, 2268, 1200), fill=ACCENT, width=4)
 
     _draw_chip(

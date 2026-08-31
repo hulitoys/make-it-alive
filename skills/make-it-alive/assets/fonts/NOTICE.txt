@@ -1,0 +1,8 @@
+Noto Sans CJK SC Regular
+
+Source: https://github.com/notofonts/noto-cjk
+Upstream path: Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf
+License: SIL Open Font License 1.1 (see OFL.txt)
+
+The bundled font file is an unmodified upstream binary and is used only for
+deterministic text rendering in the Make It Alive composition script.
