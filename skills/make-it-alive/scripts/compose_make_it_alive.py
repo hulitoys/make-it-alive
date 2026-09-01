@@ -5,9 +5,12 @@ from __future__ import print_function
 
 import argparse
 import colorsys
+import hashlib
 import os
 import random
 import sys
+import tempfile
+import urllib.request
 from pathlib import Path
 
 try:
@@ -29,6 +32,16 @@ PHOTO_MAT = (232, 227, 213)
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 BUNDLED_FONT = SKILL_DIR / "assets" / "fonts" / "NotoSansCJKsc-Regular.otf"
+FONT_DOWNLOAD_URL = (
+    "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+    "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"
+)
+FONT_SHA256 = "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+AUTO_FONT_CACHE = (
+    Path(tempfile.gettempdir())
+    / "make-it-alive-fonts"
+    / "NotoSansCJKsc-Regular.otf"
+)
 CLOSING_PUNCTUATION = frozenset("，。！？；：、）】》」』…")
 
 REGULAR_FONT_CANDIDATES = [
@@ -65,6 +78,46 @@ def _existing_font(candidates):
     return None
 
 
+def _file_sha256(path):
+    digest = hashlib.sha256()
+    with open(str(path), "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _download_verified_font():
+    """Download the licensed fallback once when an installer omitted assets."""
+    if AUTO_FONT_CACHE.is_file() and _file_sha256(AUTO_FONT_CACHE) == FONT_SHA256:
+        return str(AUTO_FONT_CACHE)
+
+    AUTO_FONT_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    partial_path = AUTO_FONT_CACHE.with_suffix(".otf.part")
+    request = urllib.request.Request(
+        FONT_DOWNLOAD_URL,
+        headers={"User-Agent": "make-it-alive-skill/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response, open(
+            str(partial_path), "wb"
+        ) as handle:
+            while True:
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                handle.write(chunk)
+        if _file_sha256(partial_path) != FONT_SHA256:
+            raise ValueError("downloaded font checksum did not match")
+        os.replace(str(partial_path), str(AUTO_FONT_CACHE))
+    finally:
+        if partial_path.exists():
+            try:
+                partial_path.unlink()
+            except OSError:
+                pass
+    return str(AUTO_FONT_CACHE)
+
+
 def resolve_fonts(explicit_font=None):
     if explicit_font:
         if not os.path.isfile(explicit_font):
@@ -81,12 +134,18 @@ def resolve_fonts(explicit_font=None):
 
     regular = _existing_font(REGULAR_FONT_CANDIDATES)
     bold = _existing_font(BOLD_FONT_CANDIDATES) or regular
-    if not regular:
+    if regular:
+        return regular, bold
+
+    try:
+        downloaded = _download_verified_font()
+        return downloaded, downloaded
+    except Exception as error:
         raise FileNotFoundError(
-            "The bundled CJK font is missing and no system fallback was found. "
-            "Reinstall the complete Skill or rerun with --font <path-to-CJK-font>."
+            "No usable CJK font could be resolved. The bundled asset was missing, "
+            "no system fallback was present, and the verified automatic fallback "
+            "failed: {}".format(error)
         )
-    return regular, bold
 
 
 def next_available_path(path):

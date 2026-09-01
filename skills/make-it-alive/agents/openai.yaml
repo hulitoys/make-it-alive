@@ -1,4 +1,4 @@
 interface:
   display_name: "Make It Alive"
   short_description: "逐张把照片物件变成精灵并直接输出完整排版成品"
-  default_prompt: "使用 $make-it-alive 处理我上传的全部照片，每张直接输出一张包含原图、精灵场景和完整文字信息的排版成品。"
+  default_prompt: "使用 $make-it-alive 处理我上传的全部照片，每张直接输出一张包含原图、精灵场景和完整文字信息的排版成品；直接运行随包排版脚本并由它自动处理中文字体。"

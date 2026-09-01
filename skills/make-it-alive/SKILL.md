@@ -15,6 +15,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
 - Never generate multiple variants for the user to choose from, ask which image they prefer, or pause for aesthetic selection. Make the design decision yourself and continue to composition.
 - Every spread must contain the complete untouched source photo A and, on the right, the same-scene illustration B plus a readable name, personality, hobby, and one small unlabelled introduction sentence. Missing any one of these elements means the spread is not deliverable.
 - Do not end after image generation. The deterministic composition and final visual check are mandatory even when B already looks polished.
+- Never run a separate system-font preflight, conclude that the environment lacks Chinese fonts, or ask the user to upload/download a font. Invoke the shipped composer directly; it resolves the bundled CJK font, a system fallback, or a checksum-verified automatic cache fallback internally.
 
 ## Inputs
 
@@ -80,8 +81,8 @@ Create one original 精灵 from one visible everyday object in each input photo.
 
    - The script applies EXIF display orientation and proportional containment. It never writes to A and never crops or overlays A.
    - The composer presents A as a complete mounted source photograph and B as a layered editorial field-guide card. It derives restrained accent colors from B so each spread feels specific to its scene, while keeping name, personality, hobby, and the small introduction in a consistent reading hierarchy.
-   - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default and falls back to a system CJK font only if the bundled asset is absent. Do not pause to ask the user to upload or download a font. `--font <path>` remains an optional explicit override.
-   - If Pillow is unavailable, report that it is required and ask before installing it. If the bundled font is missing from an incomplete installation and no system fallback exists, ask the user to reinstall the complete Skill rather than fetching a font during the task.
+   - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default. If an installer omitted that asset, it tries a system CJK font and then downloads the same SIL-OFL font from the fixed upstream URL into a temporary cache, verifying SHA-256 before use. Do not handle this process outside the script and do not ask the user for a font. `--font <path>` remains an optional explicit override.
+   - If Pillow is unavailable, report that it is required and ask before installing it. If all three internal font routes fail, report the exact packaging or network failure, preserve B, and retry only the composition after the runtime is restored; do not request a user font upload.
 
 7. Validate and deliver only the finished spread or spreads.
    - Inspect every final spread with `view_image`.
@@ -98,6 +99,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
 - If generated art contains text or protected brand elements, regenerate instead of covering them.
 - If the transformed scene cannot preserve the location after one correction, explain the mismatch rather than claiming exact correspondence.
 - If composition fails, preserve all inputs and rerun only the deterministic composition step.
+- A missing system font is not a valid stopping condition. Always run the composer so its packaged and verified automatic font routes can execute.
 - If any required text field is missing, unnatural when read aloud, logically incoherent, or clipped, fix it and recompose before delivery.
 
 ## Speed Target

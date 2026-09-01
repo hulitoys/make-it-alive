@@ -5,6 +5,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from PIL import Image, ImageChops, ImageDraw
 
@@ -125,6 +126,25 @@ class ComposeMakeItAliveTests(unittest.TestCase):
         self.assertEqual(COMPOSER.BUNDLED_FONT.resolve(), Path(regular).resolve())
         self.assertEqual(COMPOSER.BUNDLED_FONT.resolve(), Path(bold).resolve())
         self.assertTrue(COMPOSER.BUNDLED_FONT.is_file())
+        self.assertEqual(
+            COMPOSER.FONT_SHA256, COMPOSER._file_sha256(COMPOSER.BUNDLED_FONT)
+        )
+
+    def test_missing_bundle_and_system_font_use_automatic_fallback(self):
+        fallback = str(COMPOSER.BUNDLED_FONT)
+        with mock.patch.object(
+            COMPOSER, "BUNDLED_FONT", self.root / "missing-font.otf"
+        ), mock.patch.object(
+            COMPOSER, "REGULAR_FONT_CANDIDATES", []
+        ), mock.patch.object(
+            COMPOSER, "BOLD_FONT_CANDIDATES", []
+        ), mock.patch.object(
+            COMPOSER, "_download_verified_font", return_value=fallback
+        ) as download:
+            regular, bold = COMPOSER.resolve_fonts()
+        download.assert_called_once_with()
+        self.assertEqual(fallback, regular)
+        self.assertEqual(fallback, bold)
 
     def test_bundled_font_license_is_packaged(self):
         license_path = COMPOSER.BUNDLED_FONT.with_name("OFL.txt")

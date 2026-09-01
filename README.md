@@ -27,6 +27,8 @@ https://github.com/hulitoys/make-it-alive/tree/main/skills/make-it-alive
 $HOME/.agents/skills/make-it-alive
 ```
 
+如果使用端已经安装过旧版本，请重新从上述 GitHub 路径安装或刷新一次，并新开一个任务调用；仓库更新不会改写已经复制到本地或当前会话中缓存的旧文件。
+
 ## 运行环境
 
 在 ChatGPT 中请使用 **Work 模式**，或在 **Codex 任务**中安装并调用本 Skill。普通 Chat 模式适合讨论和构思，但不保证加载自定义 `SKILL.md`、执行本地 Python/Pillow 脚本或交付最终排版文件，因此不作为本 Skill 的完整运行环境。
@@ -47,7 +49,7 @@ $HOME/.agents/skills/make-it-alive
 使用 $make-it-alive，把照片里的蓝色水杯原地变成一只精灵。
 ```
 
-Skill 在 Codex 中默认使用内置 ImageGen，不需要 API Key。其他智能体需要具备等价的单次图生图能力，并能执行 Python/Pillow 排版脚本；GitHub 上的 Skill 本身不包含图片模型。Skill 已内置采用 SIL Open Font License 1.1 的 Noto Sans CJK SC，排版时不需要用户上传或临时下载中文字体；仍可用 `--font` 主动指定其他字体。
+Skill 在 Codex 中默认使用内置 ImageGen，不需要 API Key。其他智能体需要具备等价的单次图生图能力，并能执行 Python/Pillow 排版脚本；GitHub 上的 Skill 本身不包含图片模型。Skill 已内置采用 SIL Open Font License 1.1 的 Noto Sans CJK SC；如果某个安装器漏掉字体资源，排版脚本还会自动从固定的上游地址下载同一字体并校验 SHA-256。用户不需要上传字体或手动触发下载；仍可用 `--font` 主动指定其他字体。
 
 ## 速度
 
