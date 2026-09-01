@@ -86,3 +86,7 @@ Avoid: different location, moved landmarks, duplicate creature, remaining source
 ## Review the result
 
 Accept B when exactly one original 精灵 appears at the recorded source region, all three cues remain legible, the literal object is absent, the three landmarks and viewpoint remain recognizable, the scene is bright and layered, and no generated text or branded imagery appears. Request one focused correction only for a mandatory failure; accept harmless stylistic variation to protect the fast path.
+
+## Final spread hierarchy
+
+Use the deterministic composer rather than improvising the A+B layout. The finished spread should read in this order: complete original photograph, transformed scene, name, personality and hobby, then the smaller introduction. Scene-derived accent colors may decorate cards, rules, and tabs, but must not tint, crop, cover, or compete with the source photograph.

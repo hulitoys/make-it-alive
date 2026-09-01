@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-"""Compose an untouched photo and its transformed scene into one Make It Alive spread."""
+"""Compose an untouched photo and its transformed scene into an editorial field-guide spread."""
 
 from __future__ import print_function
 
 import argparse
+import colorsys
 import os
 import random
 import sys
@@ -18,14 +19,13 @@ except ImportError:
 
 
 CANVAS_SIZE = (2400, 1600)
-PAPER = (245, 239, 221)
-PAGE = (255, 251, 237)
-INK = (48, 55, 53)
-MUTED_INK = (73, 96, 92)
-ACCENT = (220, 91, 76)
-LINE = (82, 150, 143)
-PHOTO_MAT = (235, 229, 211)
-CHIP = (239, 231, 196)
+PAPER = (239, 233, 219)
+PAGE = (255, 252, 242)
+INK = (43, 48, 47)
+MUTED_INK = (85, 91, 88)
+DEFAULT_ACCENT = (67, 145, 137)
+DEFAULT_SECONDARY = (222, 105, 78)
+PHOTO_MAT = (232, 227, 213)
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 BUNDLED_FONT = SKILL_DIR / "assets" / "fonts" / "NotoSansCJKsc-Regular.otf"
@@ -237,15 +237,110 @@ def _rounded_rectangle(draw, box, radius, fill, outline=None, width=1):
         draw.rectangle(box, fill=fill, outline=outline, width=width)
 
 
-def _draw_chip(draw, box, label, value, font_path):
-    _rounded_rectangle(draw, box, 24, CHIP, LINE, 2)
-    available = box[2] - box[0] - 34
-    text = "{}｜{}".format(label, value)
-    font = _font_that_fits(draw, text, font_path, available, 31, 22)
+def _mix_color(first, second, second_weight):
+    return tuple(
+        int(round(a * (1.0 - second_weight) + b * second_weight))
+        for a, b in zip(first, second)
+    )
+
+
+def _lively_color(rgb, minimum_saturation=0.42, minimum_value=0.54):
+    hue, saturation, value = colorsys.rgb_to_hsv(
+        rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
+    )
+    saturation = max(saturation, minimum_saturation)
+    value = max(min(value, 0.82), minimum_value)
+    red, green, blue = colorsys.hsv_to_rgb(hue, saturation, value)
+    return (int(round(red * 255)), int(round(green * 255)), int(round(blue * 255)))
+
+
+def _derive_palette(image):
+    """Choose a stable lively accent and a contrasting companion from the scene."""
+    thumbnail = image.convert("RGB").resize((72, 72), _resample_filter())
+    quantized = thumbnail.quantize(colors=12)
+    raw_colors = quantized.getcolors(maxcolors=256) or []
+    palette = quantized.getpalette() or []
+    candidates = []
+    total = float(sum(count for count, _ in raw_colors) or 1)
+
+    for count, index in raw_colors:
+        start = index * 3
+        rgb = tuple(palette[start : start + 3])
+        if len(rgb) != 3:
+            continue
+        hue, saturation, value = colorsys.rgb_to_hsv(
+            rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
+        )
+        if value < 0.20 or value > 0.96 or saturation < 0.16:
+            continue
+        score = (
+            saturation * 0.58
+            + min(count / total, 0.34) * 0.60
+            - abs(value - 0.68) * 0.30
+        )
+        candidates.append((score, rgb, hue, saturation, value))
+
+    if not candidates:
+        return DEFAULT_ACCENT, DEFAULT_SECONDARY
+
+    candidates.sort(reverse=True)
+    _, primary, primary_hue, _, primary_value = candidates[0]
+    if primary_value < 0.48:
+        primary = _mix_color(primary, (255, 255, 255), 0.24)
+    primary = _lively_color(primary)
+
+    secondary = None
+    for _, rgb, hue, saturation, value in candidates[1:]:
+        hue_distance = min(abs(hue - primary_hue), 1.0 - abs(hue - primary_hue))
+        if hue_distance >= 0.16 and saturation >= 0.24 and value >= 0.34:
+            secondary = rgb
+            break
+    if secondary is None:
+        secondary = DEFAULT_SECONDARY
+    secondary = _lively_color(secondary, minimum_saturation=0.48, minimum_value=0.58)
+    return primary, secondary
+
+
+def _draw_panel(canvas, box, fill, radius=26, shadow_alpha=42, shadow_offset=(0, 12)):
+    shadow = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow)
+    shifted = (
+        box[0] + shadow_offset[0],
+        box[1] + shadow_offset[1],
+        box[2] + shadow_offset[0],
+        box[3] + shadow_offset[1],
+    )
+    _rounded_rectangle(
+        shadow_draw, shifted, radius, (65, 48, 31, shadow_alpha)
+    )
+    shadow = shadow.filter(ImageFilter.GaussianBlur(18))
+    canvas.alpha_composite(shadow)
+    draw = ImageDraw.Draw(canvas)
+    _rounded_rectangle(draw, box, radius, fill)
+
+
+def _draw_weighted_text(draw, position, text, font, fill):
+    x, y = position
+    draw.text((x, y), text, font=font, fill=fill)
+    draw.text((x + 1, y), text, font=font, fill=fill)
+
+
+def _draw_meta_card(draw, box, label, value, font_path, accent, tint):
+    _rounded_rectangle(draw, box, 22, tint, outline=_mix_color(accent, PAGE, 0.25), width=2)
+    label_font = ImageFont.truetype(font_path, 19)
+    draw.text((box[0] + 20, box[1] + 12), label, font=label_font, fill=accent)
+    available = box[2] - box[0] - 40
+    value_font = _font_that_fits(draw, value, font_path, available, 30, 22)
+    draw.text((box[0] + 20, box[1] + 39), value, font=value_font, fill=INK)
+
+
+def _draw_header_tag(draw, box, text, font_path, accent, tint):
+    _rounded_rectangle(draw, box, 21, tint)
+    font = ImageFont.truetype(font_path, 23)
     bbox = _text_bbox(draw, text, font)
-    text_height = bbox[3] - bbox[1]
-    y = box[1] + (box[3] - box[1] - text_height) // 2 - bbox[1]
-    draw.text((box[0] + 17, y), text, font=font, fill=MUTED_INK)
+    height = bbox[3] - bbox[1]
+    y = box[1] + (box[3] - box[1] - height) // 2 - bbox[1]
+    draw.text((box[0] + 18, y), text, font=font, fill=accent)
 
 
 def compose_make_it_alive(
@@ -277,71 +372,116 @@ def compose_make_it_alive(
     regular_font_path, bold_font_path = resolve_fonts(font_path)
     photo = _load_image(photo_path)
     scene = _load_image(scene_path)
+    accent, secondary = _derive_palette(scene)
+    accent_dark = _mix_color(accent, INK, 0.46)
+    accent_tint = _mix_color(accent, PAGE, 0.84)
+    secondary_tint = _mix_color(secondary, PAGE, 0.88)
+    photo_accent, _ = _derive_palette(photo)
+    photo_matte = _mix_color(photo_accent, PHOTO_MAT, 0.78)
 
     canvas = Image.new("RGBA", CANVAS_SIZE, PAPER + (255,))
     canvas = Image.alpha_composite(canvas, _paper_texture(CANVAS_SIZE))
 
-    shadow = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
-    shadow_draw = ImageDraw.Draw(shadow)
-    shadow_draw.rectangle((54, 66, 2356, 1566), fill=(65, 45, 28, 54))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(20))
-    canvas = Image.alpha_composite(canvas, shadow)
+    # Layered editorial cards replace the rigid notebook grid while preserving A+B.
+    left_card = (42, 52, 1320, 1548)
+    right_card = (1278, 28, 2358, 1572)
+    _draw_panel(canvas, left_card, PAGE + (255,), radius=30, shadow_alpha=32)
+    _draw_panel(canvas, right_card, PAGE + (255,), radius=30, shadow_alpha=54)
 
     draw = ImageDraw.Draw(canvas)
-    left_page = (45, 45, 1280, 1555)
-    right_page = (1320, 45, 2355, 1555)
-    draw.rectangle(left_page, fill=PAGE, outline=LINE, width=2)
-    draw.rectangle(right_page, fill=PAGE, outline=LINE, width=2)
-    draw.line((1294, 65, 1294, 1538), fill=(112, 88, 59), width=3)
-    draw.line((1305, 65, 1305, 1538), fill=(255, 250, 236), width=3)
+    _rounded_rectangle(draw, (1278, 28, 1304, 1572), 13, accent + (255,))
+    _rounded_rectangle(draw, (56, 72, 65, 1528), 5, secondary + (150,))
 
-    label_font = ImageFont.truetype(regular_font_path, 27)
-    draw.text((110, 82), "原景", font=label_font, fill=MUTED_INK)
-    draw.line((180, 103, 1220, 103), fill=LINE, width=2)
-
-    photo_box = (110, 128, 1220, 1490)
-    _paste_contained(canvas, photo, photo_box, PHOTO_MAT + (255,))
-    draw = ImageDraw.Draw(canvas)
-    _draw_sketch_rect(draw, photo_box, (91, 75, 54), width=3, seed=21)
-
-    draw.text((1390, 82), "Make It Alive", font=label_font, fill=MUTED_INK)
-    draw.line((1570, 103, 2268, 103), fill=LINE, width=2)
-
-    scene_box = (1380, 128, 2295, 1080)
-    _paste_contained(canvas, scene, scene_box, (249, 246, 229, 255))
-    draw = ImageDraw.Draw(canvas)
-    _draw_sketch_rect(draw, scene_box, LINE, width=2, seed=43)
-
-    name_font = _font_that_fits(draw, str(name), bold_font_path, 850, 78, 48)
-    draw.text((1390, 1088), str(name), font=name_font, fill=INK)
-    draw.line((1390, 1200, 2268, 1200), fill=ACCENT, width=4)
-
-    _draw_chip(
-        draw, (1390, 1228, 1815, 1298), "性格", personality, regular_font_path
+    _draw_header_tag(
+        draw,
+        (88, 80, 252, 124),
+        "A · 原景",
+        regular_font_path,
+        _mix_color(photo_accent, INK, 0.48),
+        _mix_color(photo_accent, PAGE, 0.85),
     )
-    _draw_chip(draw, (1843, 1228, 2268, 1298), "爱好", hobby, regular_font_path)
+    draw.line((278, 102, 1248, 102), fill=_mix_color(photo_accent, PAGE, 0.35), width=2)
+
+    photo_frame = (78, 144, 1278, 1508)
+    _draw_panel(canvas, photo_frame, (255, 255, 251, 255), radius=20, shadow_alpha=24, shadow_offset=(0, 8))
+    photo_box = (102, 168, 1254, 1484)
+    _paste_contained(canvas, photo, photo_box, photo_matte + (255,))
+    draw = ImageDraw.Draw(canvas)
+    _draw_sketch_rect(draw, photo_box, _mix_color(photo_accent, INK, 0.55), width=2, seed=21)
+
+    _draw_header_tag(
+        draw,
+        (1342, 72, 1578, 116),
+        "B · MAKE IT ALIVE",
+        regular_font_path,
+        accent_dark,
+        accent_tint,
+    )
+    draw.line((1604, 94, 2184, 94), fill=_mix_color(accent, PAGE, 0.38), width=2)
+    for index, color in enumerate((accent, secondary, accent_dark)):
+        x = 2208 + index * 32
+        draw.ellipse((x, 83, x + 14, 97), fill=color)
+
+    scene_frame = (1338, 136, 2320, 1020)
+    _draw_panel(canvas, scene_frame, (255, 255, 251, 255), radius=22, shadow_alpha=30, shadow_offset=(0, 9))
+    scene_box = (1362, 160, 2296, 996)
+    _paste_contained(canvas, scene, scene_box, accent_tint + (255,))
+    draw = ImageDraw.Draw(canvas)
+    _draw_sketch_rect(draw, scene_box, accent_dark, width=2, seed=43)
+    name_font = _font_that_fits(draw, str(name), bold_font_path, 930, 82, 50)
+    _draw_weighted_text(draw, (1344, 1040), str(name), name_font, INK)
+    draw.line((1346, 1141, 1526, 1141), fill=secondary, width=7)
+    draw.line((1538, 1141, 2318, 1141), fill=_mix_color(accent, PAGE, 0.52), width=2)
+
+    _draw_meta_card(
+        draw,
+        (1344, 1170, 1814, 1268),
+        "性格 / PERSONALITY",
+        personality,
+        regular_font_path,
+        accent_dark,
+        accent_tint,
+    )
+    _draw_meta_card(
+        draw,
+        (1832, 1170, 2318, 1268),
+        "爱好 / HOBBY",
+        hobby,
+        regular_font_path,
+        _mix_color(secondary, INK, 0.42),
+        secondary_tint,
+    )
+
+    intro_panel = (1344, 1294, 2318, 1458)
+    _rounded_rectangle(draw, intro_panel, 24, _mix_color(accent_tint, PAGE, 0.36))
+    _rounded_rectangle(
+        draw,
+        (intro_panel[0], intro_panel[1], intro_panel[0] + 9, intro_panel[3]),
+        5,
+        accent,
+    )
 
     intro_font, intro_lines = _wrapped_font_that_fits(
         draw,
         intro,
         regular_font_path,
-        max_width=878,
+        max_width=900,
         max_lines=2,
-        start_size=26,
-        min_size=21,
+        start_size=25,
+        min_size=20,
     )
-    intro_y = 1340
+    intro_y = 1330
     intro_box = _text_bbox(draw, "示例Ag", intro_font)
-    intro_line_height = intro_box[3] - intro_box[1] + 12
+    intro_line_height = intro_box[3] - intro_box[1] + 14
     for line in intro_lines:
-        draw.text((1390, intro_y), line, font=intro_font, fill=MUTED_INK)
+        draw.text((1380, intro_y), line, font=intro_font, fill=MUTED_INK)
         intro_y += intro_line_height
 
-    draw.line((1390, 1468, 2268, 1468), fill=LINE, width=2)
-    footer_font = ImageFont.truetype(regular_font_path, 21)
-    draw.text(
-        (1390, 1486), "MAKE IT ALIVE", font=footer_font, fill=MUTED_INK
-    )
+    draw.line((1344, 1494, 2225, 1494), fill=_mix_color(accent, PAGE, 0.40), width=2)
+    footer_font = ImageFont.truetype(regular_font_path, 18)
+    draw.text((1344, 1512), "MAKE IT ALIVE · FIELD GUIDE", font=footer_font, fill=MUTED_INK)
+    page_font = ImageFont.truetype(regular_font_path, 23)
+    draw.text((2262, 1506), "01", font=page_font, fill=accent_dark)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     final_path = next_available_path(output_path)

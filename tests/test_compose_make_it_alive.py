@@ -151,6 +151,16 @@ class ComposeMakeItAliveTests(unittest.TestCase):
             )
         )
 
+    def test_scene_palette_is_dynamic_and_keeps_lively_accents(self):
+        warm_scene = Image.new("RGB", (120, 120), (196, 78, 44))
+        cool_scene = Image.new("RGB", (120, 120), (45, 105, 178))
+        warm_accent, _ = COMPOSER._derive_palette(warm_scene)
+        cool_accent, _ = COMPOSER._derive_palette(cool_scene)
+        self.assertNotEqual(warm_accent, cool_accent)
+        for accent in (warm_accent, cool_accent):
+            channel_range = max(accent) - min(accent)
+            self.assertGreaterEqual(channel_range, 45)
+
     def test_cli_interface_uses_scene_argument(self):
         parsed = COMPOSER.parse_args(
             [

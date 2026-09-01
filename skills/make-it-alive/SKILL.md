@@ -79,6 +79,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
      ```
 
    - The script applies EXIF display orientation and proportional containment. It never writes to A and never crops or overlays A.
+   - The composer presents A as a complete mounted source photograph and B as a layered editorial field-guide card. It derives restrained accent colors from B so each spread feels specific to its scene, while keeping name, personality, hobby, and the small introduction in a consistent reading hierarchy.
    - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default and falls back to a system CJK font only if the bundled asset is absent. Do not pause to ask the user to upload or download a font. `--font <path>` remains an optional explicit override.
    - If Pillow is unavailable, report that it is required and ask before installing it. If the bundled font is missing from an incomplete installation and no system fallback exists, ask the user to reinstall the complete Skill rather than fetching a font during the task.
 
