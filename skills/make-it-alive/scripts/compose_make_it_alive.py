@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compose an untouched photo and its transformed scene into an editorial field-guide spread."""
+"""Compose a source photo and transformed scene as an original collectible-card spread."""
 
 from __future__ import print_function
 
@@ -22,13 +22,14 @@ except ImportError:
 
 
 CANVAS_SIZE = (2400, 1600)
-PAPER = (239, 233, 219)
-PAGE = (255, 252, 242)
-INK = (43, 48, 47)
-MUTED_INK = (85, 91, 88)
+PAPER = (22, 27, 39)
+PAGE = (250, 247, 235)
+INK = (38, 39, 43)
+MUTED_INK = (82, 82, 86)
 DEFAULT_ACCENT = (67, 145, 137)
 DEFAULT_SECONDARY = (222, 105, 78)
 PHOTO_MAT = (232, 227, 213)
+FOIL = (226, 194, 103)
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 BUNDLED_FONT = SKILL_DIR / "assets" / "fonts" / "NotoSansCJKsc-Regular.otf"
@@ -402,6 +403,288 @@ def _draw_header_tag(draw, box, text, font_path, accent, tint):
     draw.text((box[0] + 18, y), text, font=font, fill=accent)
 
 
+def _inset_box(box, amount):
+    return (
+        box[0] + amount,
+        box[1] + amount,
+        box[2] - amount,
+        box[3] - amount,
+    )
+
+
+def _fit_cover_dimensions(source_size, target_size):
+    source_width, source_height = source_size
+    target_width, target_height = target_size
+    scale = max(
+        float(target_width) / float(source_width),
+        float(target_height) / float(source_height),
+    )
+    return (
+        max(1, int(round(source_width * scale))),
+        max(1, int(round(source_height * scale))),
+    )
+
+
+def _collector_backdrop(size, accent, secondary, seed=2409):
+    width, height = size
+    top = _mix_color(accent, (10, 14, 27), 0.78)
+    bottom = _mix_color(secondary, (14, 18, 31), 0.84)
+    gradient = Image.new("RGBA", (1, height), (0, 0, 0, 255))
+    pixels = []
+    for y in range(height):
+        ratio = float(y) / float(max(1, height - 1))
+        color = _mix_color(top, bottom, ratio)
+        pixels.append(color + (255,))
+    gradient.putdata(pixels)
+    backdrop = gradient.resize(size)
+
+    glow = Image.new("RGBA", size, (0, 0, 0, 0))
+    glow_draw = ImageDraw.Draw(glow)
+    glow_draw.ellipse(
+        (-280, 40, 900, 1220), fill=accent + (92,)
+    )
+    glow_draw.ellipse(
+        (1450, 240, 2700, 1510), fill=secondary + (74,)
+    )
+    glow = glow.filter(ImageFilter.GaussianBlur(150))
+    backdrop = Image.alpha_composite(backdrop, glow)
+
+    pattern = Image.new("RGBA", size, (0, 0, 0, 0))
+    pattern_draw = ImageDraw.Draw(pattern)
+    for offset in range(-height, width + height, 190):
+        pattern_draw.polygon(
+            (
+                (offset, 0),
+                (offset + 78, 0),
+                (offset - height + 78, height),
+                (offset - height, height),
+            ),
+            fill=(255, 255, 255, 10),
+        )
+    rng = random.Random(seed)
+    for _ in range(180):
+        x = rng.randrange(18, width - 18)
+        y = rng.randrange(18, height - 18)
+        radius = rng.choice((1, 1, 2, 2, 3))
+        color = rng.choice((accent + (80,), secondary + (72,), FOIL + (92,)))
+        pattern_draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+    return Image.alpha_composite(backdrop, pattern)
+
+
+def _draw_sparkle(draw, center, radius, color):
+    x, y = center
+    draw.polygon(
+        (
+            (x, y - radius),
+            (x + max(1, radius // 4), y - max(1, radius // 4)),
+            (x + radius, y),
+            (x + max(1, radius // 4), y + max(1, radius // 4)),
+            (x, y + radius),
+            (x - max(1, radius // 4), y + max(1, radius // 4)),
+            (x - radius, y),
+            (x - max(1, radius // 4), y - max(1, radius // 4)),
+        ),
+        fill=color,
+    )
+
+
+def _draw_collectible_card(canvas, box, accent, secondary, seed):
+    accent_dark = _mix_color(accent, (20, 22, 30), 0.60)
+    foil = _mix_color(FOIL, accent, 0.18)
+    _draw_panel(
+        canvas,
+        box,
+        accent_dark + (255,),
+        radius=44,
+        shadow_alpha=105,
+        shadow_offset=(0, 20),
+    )
+    draw = ImageDraw.Draw(canvas)
+    _rounded_rectangle(draw, _inset_box(box, 6), 39, accent + (255,))
+    _rounded_rectangle(draw, _inset_box(box, 13), 34, foil + (255,))
+    _rounded_rectangle(draw, _inset_box(box, 20), 30, accent_dark + (255,))
+    surface = _inset_box(box, 29)
+    _rounded_rectangle(draw, surface, 25, PAGE + (255,))
+    _rounded_rectangle(
+        draw,
+        _inset_box(surface, 5),
+        21,
+        None,
+        outline=_mix_color(accent, PAGE, 0.42),
+        width=2,
+    )
+
+    rng = random.Random(seed)
+    for _ in range(9):
+        side = rng.choice(("left", "right", "top", "bottom"))
+        if side in ("left", "right"):
+            x = box[0] + rng.choice((11, 17)) if side == "left" else box[2] - rng.choice((11, 17))
+            y = rng.randrange(box[1] + 65, box[3] - 65)
+        else:
+            x = rng.randrange(box[0] + 65, box[2] - 65)
+            y = box[1] + rng.choice((11, 17)) if side == "top" else box[3] - rng.choice((11, 17))
+        _draw_sparkle(draw, (x, y), rng.choice((4, 5, 7)), (255, 245, 190, 180))
+    return surface
+
+
+def _paste_showcase(canvas, image, box, accent, seed=88):
+    """Fill the window with a blurred cover layer and a complete sharp image."""
+    left, top, right, bottom = box
+    width = right - left
+    height = bottom - top
+
+    cover_size = _fit_cover_dimensions(image.size, (width, height))
+    cover = image.resize(cover_size, _resample_filter())
+    crop_left = max(0, (cover_size[0] - width) // 2)
+    crop_top = max(0, (cover_size[1] - height) // 2)
+    cover = cover.crop((crop_left, crop_top, crop_left + width, crop_top + height))
+    blur_radius = max(18, min(width, height) // 32)
+    cover = cover.filter(ImageFilter.GaussianBlur(blur_radius))
+    canvas.alpha_composite(cover, (left, top))
+
+    wash = Image.new("RGBA", (width, height), accent + (22,))
+    canvas.alpha_composite(wash, (left, top))
+
+    padding = 22
+    sharp_size = _fit_dimensions(image.size, (width - padding * 2, height - padding * 2))
+    sharp = image.resize(sharp_size, _resample_filter())
+    x = left + (width - sharp_size[0]) // 2
+    y = top + (height - sharp_size[1]) // 2
+    sharp_box = (x, y, x + sharp_size[0], y + sharp_size[1])
+
+    shadow = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow)
+    shadow_draw.rectangle(
+        (sharp_box[0] - 7, sharp_box[1] - 7, sharp_box[2] + 7, sharp_box[3] + 7),
+        fill=(7, 10, 16, 110),
+    )
+    shadow = shadow.filter(ImageFilter.GaussianBlur(14))
+    canvas.alpha_composite(shadow)
+
+    draw = ImageDraw.Draw(canvas)
+    draw.rectangle(
+        (sharp_box[0] - 7, sharp_box[1] - 7, sharp_box[2] + 7, sharp_box[3] + 7),
+        fill=(255, 252, 238, 255),
+    )
+    canvas.alpha_composite(sharp, (x, y))
+    draw = ImageDraw.Draw(canvas)
+    draw.rectangle(sharp_box, outline=_mix_color(accent, INK, 0.50), width=3)
+
+    rng = random.Random(seed)
+    for _ in range(8):
+        px = rng.randrange(left + 20, right - 20)
+        py = rng.randrange(top + 20, bottom - 20)
+        if sharp_box[0] - 14 <= px <= sharp_box[2] + 14 and sharp_box[1] - 14 <= py <= sharp_box[3] + 14:
+            continue
+        _draw_sparkle(draw, (px, py), rng.choice((3, 4, 5)), (255, 250, 220, 135))
+    return sharp_box
+
+
+def _draw_art_window(canvas, image, outer_box, accent, secondary, seed):
+    draw = ImageDraw.Draw(canvas)
+    accent_dark = _mix_color(accent, (20, 22, 28), 0.58)
+    foil = _mix_color(FOIL, secondary, 0.16)
+    _rounded_rectangle(draw, outer_box, 24, accent_dark + (255,))
+    _rounded_rectangle(draw, _inset_box(outer_box, 6), 19, foil + (255,))
+    _rounded_rectangle(draw, _inset_box(outer_box, 12), 15, accent + (255,))
+    image_box = _inset_box(outer_box, 18)
+    sharp_box = _paste_showcase(canvas, image, image_box, accent, seed=seed)
+    draw = ImageDraw.Draw(canvas)
+    _rounded_rectangle(draw, outer_box, 24, None, outline=(20, 22, 28, 210), width=3)
+    return image_box, sharp_box
+
+
+def _draw_trait_panel(draw, box, label, value, font_path, accent):
+    accent_dark = _mix_color(accent, INK, 0.42)
+    tint = _mix_color(accent, PAGE, 0.86)
+    _rounded_rectangle(draw, box, 18, tint + (255,), outline=accent_dark, width=2)
+    header_bottom = box[1] + 32
+    _rounded_rectangle(
+        draw,
+        (box[0], box[1], box[2], header_bottom + 8),
+        18,
+        accent_dark + (255,),
+    )
+    draw.rectangle((box[0], header_bottom - 2, box[2], header_bottom + 8), fill=accent_dark)
+    label_font = ImageFont.truetype(font_path, 17)
+    draw.text((box[0] + 18, box[1] + 7), label, font=label_font, fill=PAGE)
+    value_font = _font_that_fits(
+        draw, value, font_path, box[2] - box[0] - 36, 30, 21
+    )
+    draw.text((box[0] + 18, box[1] + 48), value, font=value_font, fill=INK)
+
+
+def _draw_lore_panel(draw, box, intro, font_path, accent, secondary):
+    tint = _mix_color(accent, PAGE, 0.90)
+    border = _mix_color(FOIL, secondary, 0.18)
+    _rounded_rectangle(draw, box, 20, tint + (255,), outline=border, width=3)
+    draw.polygon(
+        (
+            (box[0], box[1] + 28),
+            (box[0] + 18, box[1] + 10),
+            (box[0] + 18, box[3] - 10),
+            (box[0], box[3] - 28),
+        ),
+        fill=accent,
+    )
+    font, lines = _wrapped_font_that_fits(
+        draw,
+        intro,
+        font_path,
+        max_width=box[2] - box[0] - 74,
+        max_lines=2,
+        start_size=24,
+        min_size=19,
+    )
+    sample = _text_bbox(draw, "示例Ag", font)
+    line_height = sample[3] - sample[1] + 13
+    total_height = line_height * len(lines) - 13
+    y = box[1] + (box[3] - box[1] - total_height) // 2 - sample[1]
+    for line in lines:
+        draw.text((box[0] + 44, y), line, font=font, fill=INK)
+        y += line_height
+
+
+def _source_card_layout(image_size):
+    """Choose a card silhouette that respects the source image orientation."""
+    aspect = float(image_size[0]) / float(image_size[1])
+    if aspect >= 1.15:
+        return {
+            "card": (48, 238, 1216, 1370),
+            "band": (100, 290, 1164, 370),
+            "art": (100, 388, 1164, 1138),
+            "footer": (100, 1156, 1164, 1318),
+            "label": (126, 307),
+            "meta": (958, 315),
+            "footer_title": (126, 1183),
+            "footer_meta": (126, 1224),
+            "swatches": (1040, 1200),
+        }
+    if aspect <= 0.88:
+        return {
+            "card": (64, 72, 1148, 1540),
+            "band": (116, 122, 1096, 202),
+            "art": (116, 220, 1096, 1388),
+            "footer": (116, 1406, 1096, 1488),
+            "label": (142, 139),
+            "meta": (898, 147),
+            "footer_title": (140, 1423),
+            "footer_meta": (140, 1457),
+            "swatches": (982, 1436),
+        }
+    return {
+        "card": (48, 140, 1216, 1460),
+        "band": (100, 192, 1164, 272),
+        "art": (100, 290, 1164, 1254),
+        "footer": (100, 1272, 1164, 1408),
+        "label": (126, 209),
+        "meta": (958, 217),
+        "footer_title": (126, 1295),
+        "footer_meta": (126, 1334),
+        "swatches": (1040, 1312),
+    }
+
+
 def compose_make_it_alive(
     photo_path,
     scene_path,
@@ -434,113 +717,125 @@ def compose_make_it_alive(
     accent, secondary = _derive_palette(scene)
     accent_dark = _mix_color(accent, INK, 0.46)
     accent_tint = _mix_color(accent, PAGE, 0.84)
-    secondary_tint = _mix_color(secondary, PAGE, 0.88)
     photo_accent, _ = _derive_palette(photo)
-    photo_matte = _mix_color(photo_accent, PHOTO_MAT, 0.78)
 
-    canvas = Image.new("RGBA", CANVAS_SIZE, PAPER + (255,))
-    canvas = Image.alpha_composite(canvas, _paper_texture(CANVAS_SIZE))
+    canvas = _collector_backdrop(CANVAS_SIZE, accent, secondary)
 
-    # Layered editorial cards replace the rigid notebook grid while preserving A+B.
-    left_card = (42, 52, 1320, 1548)
-    right_card = (1278, 28, 2358, 1572)
-    _draw_panel(canvas, left_card, PAGE + (255,), radius=30, shadow_alpha=32)
-    _draw_panel(canvas, right_card, PAGE + (255,), radius=30, shadow_alpha=54)
-
+    # Two deliberately card-shaped shells create a collectible display rather than
+    # another flat editorial split. The slight vertical offset adds depth.
+    source_layout = _source_card_layout(photo.size)
+    left_card = source_layout["card"]
+    right_card = (1252, 30, 2336, 1498)
+    _draw_collectible_card(canvas, left_card, photo_accent, secondary, seed=701)
+    _draw_collectible_card(canvas, right_card, accent, secondary, seed=1701)
     draw = ImageDraw.Draw(canvas)
-    _rounded_rectangle(draw, (1278, 28, 1304, 1572), 13, accent + (255,))
-    _rounded_rectangle(draw, (56, 72, 65, 1528), 5, secondary + (150,))
 
-    _draw_header_tag(
+    # Source card header.
+    source_band = source_layout["band"]
+    _rounded_rectangle(
         draw,
-        (88, 80, 252, 124),
-        "A · 原景",
-        regular_font_path,
-        _mix_color(photo_accent, INK, 0.48),
-        _mix_color(photo_accent, PAGE, 0.85),
+        source_band,
+        18,
+        _mix_color(photo_accent, INK, 0.50) + (255,),
+        outline=_mix_color(FOIL, photo_accent, 0.18),
+        width=3,
     )
-    draw.line((278, 102, 1248, 102), fill=_mix_color(photo_accent, PAGE, 0.35), width=2)
+    source_label_font = ImageFont.truetype(regular_font_path, 27)
+    source_meta_font = ImageFont.truetype(regular_font_path, 17)
+    draw.text(source_layout["label"], "A · 原景", font=source_label_font, fill=PAGE)
+    draw.text(source_layout["meta"], "SOURCE FRAME", font=source_meta_font, fill=(245, 236, 204))
 
-    photo_frame = (78, 144, 1278, 1508)
-    _draw_panel(canvas, photo_frame, (255, 255, 251, 255), radius=20, shadow_alpha=24, shadow_offset=(0, 8))
-    photo_box = (102, 168, 1254, 1484)
-    _paste_contained(canvas, photo, photo_box, photo_matte + (255,))
-    draw = ImageDraw.Draw(canvas)
-    _draw_sketch_rect(draw, photo_box, _mix_color(photo_accent, INK, 0.55), width=2, seed=21)
-
-    _draw_header_tag(
-        draw,
-        (1342, 72, 1578, 116),
-        "B · MAKE IT ALIVE",
-        regular_font_path,
-        accent_dark,
-        accent_tint,
+    # A stays complete and sharp; a blurred cover crop fills the card window.
+    source_art_outer = source_layout["art"]
+    _draw_art_window(
+        canvas,
+        photo,
+        source_art_outer,
+        photo_accent,
+        secondary,
+        seed=211,
     )
-    draw.line((1604, 94, 2184, 94), fill=_mix_color(accent, PAGE, 0.38), width=2)
-    for index, color in enumerate((accent, secondary, accent_dark)):
-        x = 2208 + index * 32
-        draw.ellipse((x, 83, x + 14, 97), fill=color)
-
-    scene_frame = (1338, 136, 2320, 1020)
-    _draw_panel(canvas, scene_frame, (255, 255, 251, 255), radius=22, shadow_alpha=30, shadow_offset=(0, 9))
-    scene_box = (1362, 160, 2296, 996)
-    _paste_contained(canvas, scene, scene_box, accent_tint + (255,))
     draw = ImageDraw.Draw(canvas)
-    _draw_sketch_rect(draw, scene_box, accent_dark, width=2, seed=43)
-    name_font = _font_that_fits(draw, str(name), bold_font_path, 930, 82, 50)
-    _draw_weighted_text(draw, (1344, 1040), str(name), name_font, INK)
-    draw.line((1346, 1141, 1526, 1141), fill=secondary, width=7)
-    draw.line((1538, 1141, 2318, 1141), fill=_mix_color(accent, PAGE, 0.52), width=2)
-
-    _draw_meta_card(
+    source_footer = source_layout["footer"]
+    _rounded_rectangle(
         draw,
-        (1344, 1170, 1814, 1268),
+        source_footer,
+        18,
+        _mix_color(photo_accent, PAGE, 0.88) + (255,),
+        outline=_mix_color(photo_accent, INK, 0.50),
+        width=2,
+    )
+    footer_title_font = ImageFont.truetype(regular_font_path, 21)
+    footer_small_font = ImageFont.truetype(regular_font_path, 16)
+    draw.text(source_layout["footer_title"], "完整原图", font=footer_title_font, fill=INK)
+    draw.text(source_layout["footer_meta"], "FULL FRAME · SOURCE FILE UNCHANGED", font=footer_small_font, fill=MUTED_INK)
+    swatch_x, swatch_y = source_layout["swatches"]
+    for index, color in enumerate((photo_accent, secondary, _mix_color(photo_accent, INK, 0.55))):
+        x = swatch_x + index * 28
+        draw.ellipse((x, swatch_y, x + 15, swatch_y + 15), fill=color)
+
+    # Creature card header follows collectible-card hierarchy: identity first.
+    draw.text((1306, 74), "MAKE IT ALIVE", font=footer_small_font, fill=accent_dark)
+    name_font = _font_that_fits(draw, str(name), bold_font_path, 720, 66, 44)
+    _draw_weighted_text(draw, (1304, 98), str(name), name_font, INK)
+    number_font = ImageFont.truetype(regular_font_path, 21)
+    draw.text((2160, 114), "No. 001", font=number_font, fill=accent_dark)
+    draw.line((1304, 174, 2284, 174), fill=_mix_color(FOIL, accent, 0.24), width=5)
+    draw.line((1304, 181, 1608, 181), fill=secondary, width=5)
+
+    scene_art_outer = (1304, 196, 2284, 1028)
+    _draw_art_window(
+        canvas,
+        scene,
+        scene_art_outer,
+        accent,
+        secondary,
+        seed=431,
+    )
+    draw = ImageDraw.Draw(canvas)
+
+    descriptor_band = (1304, 1046, 2284, 1092)
+    _rounded_rectangle(
+        draw,
+        descriptor_band,
+        20,
+        accent_dark + (255,),
+        outline=_mix_color(FOIL, secondary, 0.18),
+        width=2,
+    )
+    descriptor_font = ImageFont.truetype(regular_font_path, 18)
+    draw.text((1330, 1057), "原创精灵档案 · ORIGINAL COMPANION", font=descriptor_font, fill=PAGE)
+    draw.text((2184, 1057), "001", font=descriptor_font, fill=(245, 236, 204))
+
+    _draw_trait_panel(
+        draw,
+        (1304, 1110, 1782, 1212),
         "性格 / PERSONALITY",
         personality,
         regular_font_path,
-        accent_dark,
-        accent_tint,
+        accent,
     )
-    _draw_meta_card(
+    _draw_trait_panel(
         draw,
-        (1832, 1170, 2318, 1268),
+        (1802, 1110, 2284, 1212),
         "爱好 / HOBBY",
         hobby,
         regular_font_path,
-        _mix_color(secondary, INK, 0.42),
-        secondary_tint,
+        secondary,
     )
-
-    intro_panel = (1344, 1294, 2318, 1458)
-    _rounded_rectangle(draw, intro_panel, 24, _mix_color(accent_tint, PAGE, 0.36))
-    _rounded_rectangle(
+    _draw_lore_panel(
         draw,
-        (intro_panel[0], intro_panel[1], intro_panel[0] + 9, intro_panel[3]),
-        5,
-        accent,
-    )
-
-    intro_font, intro_lines = _wrapped_font_that_fits(
-        draw,
+        (1304, 1234, 2284, 1390),
         intro,
         regular_font_path,
-        max_width=900,
-        max_lines=2,
-        start_size=25,
-        min_size=20,
+        accent,
+        secondary,
     )
-    intro_y = 1330
-    intro_box = _text_bbox(draw, "示例Ag", intro_font)
-    intro_line_height = intro_box[3] - intro_box[1] + 14
-    for line in intro_lines:
-        draw.text((1380, intro_y), line, font=intro_font, fill=MUTED_INK)
-        intro_y += intro_line_height
 
-    draw.line((1344, 1494, 2225, 1494), fill=_mix_color(accent, PAGE, 0.40), width=2)
-    footer_font = ImageFont.truetype(regular_font_path, 18)
-    draw.text((1344, 1512), "MAKE IT ALIVE · FIELD GUIDE", font=footer_font, fill=MUTED_INK)
-    page_font = ImageFont.truetype(regular_font_path, 23)
-    draw.text((2262, 1506), "01", font=page_font, fill=accent_dark)
+    draw.line((1304, 1412, 2144, 1412), fill=_mix_color(accent, PAGE, 0.52), width=2)
+    draw.text((1304, 1427), "MAKE IT ALIVE · FIELD GUIDE", font=footer_small_font, fill=MUTED_INK)
+    _draw_sparkle(draw, (2222, 1436), 10, _mix_color(FOIL, secondary, 0.20))
+    draw.text((2250, 1425), "01", font=number_font, fill=accent_dark)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     final_path = next_available_path(output_path)

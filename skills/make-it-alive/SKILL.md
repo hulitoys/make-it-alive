@@ -1,11 +1,11 @@
 ---
 name: make-it-alive
-description: Turn one visible object in each of one or more user-provided everyday photos into an original collectible-style 精灵, repaint each same scene with the 精灵 replacing that object in place, and compose every untouched photo beside its bright hand-painted transformation scene. Use when the user asks to make photographed cups, plants, grass, stones, tools, or other visible objects come alive without copying an existing franchise. Select one object per photo automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
+description: Turn one visible object in each of one or more user-provided everyday photos into an original collectible-style 精灵, repaint each same scene with the 精灵 replacing that object in place, and compose the complete source photo beside its bright hand-painted transformation scene in an original double collectible-card layout. Use when the user asks to make photographed cups, plants, grass, stones, tools, or other visible objects come alive without copying an existing franchise. Select one object per photo automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
 ---
 
 # Make It Alive
 
-Create one original 精灵 from one visible everyday object in each input photo. Show every untouched source photo beside a hand-painted version of the same scene in which that object has become the 精灵. Use one image-generation call per input by default. The only deliverable for each input is its finished A+B spread.
+Create one original 精灵 from one visible everyday object in each input photo. Show the complete source photo beside a hand-painted version of the same scene in which that object has become the 精灵. Present both sides as an original double collectible-card display. Use one image-generation call per input by default. The only deliverable for each input is its finished A+B spread.
 
 ## Non-negotiable output contract
 
@@ -13,7 +13,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
 - Process every photo independently. Select one object, create one 精灵, and compose one spread for each photo.
 - Deliver only finished A+B spreads. Never expose a transformed scene B, identity sheet, sketch, candidate image, contact sheet, or uncomposed generated image as a deliverable.
 - Never generate multiple variants for the user to choose from, ask which image they prefer, or pause for aesthetic selection. Make the design decision yourself and continue to composition.
-- Every spread must contain the complete untouched source photo A and, on the right, the same-scene illustration B plus a readable name, personality, hobby, and one small unlabelled introduction sentence. Missing any one of these elements means the spread is not deliverable.
+- Every spread must contain a complete, sharp, uncropped view of source photo A and, on the right, the same-scene illustration B plus a readable name, personality, hobby, and one small unlabelled introduction sentence. Missing any one of these elements means the spread is not deliverable.
 - Do not end after image generation. The deterministic composition and final visual check are mandatory even when B already looks polished.
 - Never run a separate system-font preflight, conclude that the environment lacks Chinese fonts, or ask the user to upload/download a font. Invoke the shipped composer directly; it resolves the bundled CJK font, a system fallback, or a checksum-verified automatic cache fallback internally.
 
@@ -28,7 +28,7 @@ Create one original 精灵 from one visible everyday object in each input photo.
 
 1. Build the input list and inspect every photo in order.
    - If it is a local file, inspect it with `view_image` before generation.
-   - Never overwrite, crop, retouch, recolor, publish, or commit the source file.
+   - Never overwrite, crop, retouch, recolor, publish, or commit the source file. The final compositor may create a temporary blurred cover-fill layer from A behind the complete sharp A layer; this changes only the final derivative canvas, never the source file.
    - The source may be passed to ImageGen to create a new derivative scene, but it must never be written back to the source path.
 
 2. Select exactly one object per photo.
@@ -79,14 +79,16 @@ Create one original 精灵 from one visible everyday object in each input photo.
        --output output/make-it-alive/<name>-make-it-alive.png
      ```
 
-   - The script applies EXIF display orientation and proportional containment. It never writes to A and never crops or overlays A.
-   - The composer presents A as a complete mounted source photograph and B as a layered editorial field-guide card. It derives restrained accent colors from B so each spread feels specific to its scene, while keeping name, personality, hobby, and the small introduction in a consistent reading hierarchy.
+   - The script applies EXIF display orientation and proportional containment to the complete sharp A layer. It never writes to A. To make both landscape and portrait inputs fill a tall card art window without large empty bands, it places a softly blurred cover-crop of the same image behind that complete sharp layer; the readable source image itself remains uncropped and unobscured.
+   - The composer presents A and B as two richly framed, original collectible cards with staggered depth, foil-like trim, scene-derived color, a strong name-first hierarchy, clear trait panels, and a smaller unlabelled introduction. It must look intentionally designed rather than like a flat split-screen or minimal document template.
+   - Borrow only general collectible-card hierarchy. Never reproduce an existing card frame, logo, property icon, energy symbol, statistic system, set mark, rarity mark, or branded typography.
    - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default. If an installer omitted that asset, it tries a system CJK font and then downloads the same SIL-OFL font from the fixed upstream URL into a temporary cache, verifying SHA-256 before use. Do not handle this process outside the script and do not ask the user for a font. `--font <path>` remains an optional explicit override.
    - If Pillow is unavailable, report that it is required and ask before installing it. If all three internal font routes fail, report the exact packaging or network failure, preserve B, and retry only the composition after the runtime is restored; do not request a user font upload.
 
 7. Validate and deliver only the finished spread or spreads.
    - Inspect every final spread with `view_image`.
-   - Confirm A is complete and unaltered; B matches its viewpoint and landmarks; the selected object is replaced in place; the 精灵 preserves all three cues; the name, personality, hobby, and small introduction are present, exact, readable, natural, and not clipped.
+   - Confirm the complete sharp A layer is present and uncropped, the source file hash is unchanged, and any extra fill around A is visibly subordinate blur rather than invented content. Confirm B matches its viewpoint and landmarks; the selected object is replaced in place; the 精灵 preserves all three cues; the name, personality, hobby, and small introduction are present, exact, readable, natural, and not clipped.
+   - Confirm landscape, portrait, and square inputs fill both card windows without large blank matte areas; the complete sharp image must remain easy to distinguish from its blurred extension.
    - Confirm there is no thick black outline, gloomy gray cast, generated text, trademarked imagery, plastic 3D finish, or watermark.
    - Count the finished spread paths before responding. The count must equal the number of input photos; if it does not, finish the missing compositions first.
    - For one input, display exactly one final A+B spread inline. For N inputs, display exactly N final A+B spreads inline in input order.

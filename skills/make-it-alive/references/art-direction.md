@@ -89,4 +89,6 @@ Accept B when exactly one original 精灵 appears at the recorded source region,
 
 ## Final spread hierarchy
 
-Use the deterministic composer rather than improvising the A+B layout. The finished spread should read in this order: complete original photograph, transformed scene, name, personality and hobby, then the smaller introduction. Scene-derived accent colors may decorate cards, rules, and tabs, but must not tint, crop, cover, or compete with the source photograph.
+Use the deterministic composer rather than improvising the A+B layout. Present A and B as an original pair of premium collectible cards, not a minimal two-column page. The finished spread should read in this order: complete original photograph, transformed scene and name, personality and hobby, then the smaller introduction. Use a substantial multi-layer card shell, staggered depth, scene-derived accent colors, foil-like trim, and small decorative marks to create richness without copying an existing franchise's frame or UI.
+
+Both landscape and portrait inputs must fill their tall art windows gracefully. The composer may use a softly blurred cover-crop as an atmospheric extension behind a complete sharp proportionally contained image. The complete sharp A must stay uncropped, unobscured, and visually dominant, and the source file itself must remain byte-unchanged. Never leave large plain letterbox or matte bands around either image.

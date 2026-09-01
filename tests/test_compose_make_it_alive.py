@@ -102,6 +102,51 @@ class ComposeMakeItAliveTests(unittest.TestCase):
                     places=2,
                 )
 
+    def test_cover_dimensions_fill_landscape_and_portrait_windows(self):
+        target = (944, 1132)
+        for source in [(1600, 900), (900, 1600), (1024, 1024)]:
+            with self.subTest(source=source):
+                fitted = COMPOSER._fit_cover_dimensions(source, target)
+                self.assertGreaterEqual(fitted[0], target[0])
+                self.assertGreaterEqual(fitted[1], target[1])
+                self.assertTrue(fitted[0] == target[0] or fitted[1] == target[1])
+
+    def test_source_card_changes_silhouette_with_photo_orientation(self):
+        landscape = COMPOSER._source_card_layout((1600, 900))["card"]
+        portrait = COMPOSER._source_card_layout((900, 1600))["card"]
+        square = COMPOSER._source_card_layout((1000, 1000))["card"]
+        landscape_size = (landscape[2] - landscape[0], landscape[3] - landscape[1])
+        portrait_size = (portrait[2] - portrait[0], portrait[3] - portrait[1])
+        square_size = (square[2] - square[0], square[3] - square[1])
+        self.assertGreater(landscape_size[0], landscape_size[1])
+        self.assertLess(portrait_size[0], portrait_size[1])
+        self.assertLess(square_size[0], square_size[1])
+        self.assertNotEqual(landscape, portrait)
+
+    def test_showcase_uses_blurred_fill_and_complete_sharp_layer(self):
+        target = (40, 40, 440, 640)
+        for index, source in enumerate([(900, 500), (500, 900)]):
+            with self.subTest(source=source):
+                fixture = self.root / "showcase-{}.png".format(index)
+                make_fixture(fixture, source, (34, 66, 104), (242, 190, 72))
+                with Image.open(str(fixture)) as opened:
+                    image = opened.convert("RGBA")
+                canvas = Image.new("RGBA", (500, 700), (0, 0, 0, 0))
+                sharp_box = COMPOSER._paste_showcase(
+                    canvas, image, target, (72, 150, 138), seed=30 + index
+                )
+                self.assertGreaterEqual(sharp_box[0], target[0])
+                self.assertGreaterEqual(sharp_box[1], target[1])
+                self.assertLessEqual(sharp_box[2], target[2])
+                self.assertLessEqual(sharp_box[3], target[3])
+                sharp_size = (sharp_box[2] - sharp_box[0], sharp_box[3] - sharp_box[1])
+                self.assertAlmostEqual(
+                    float(source[0]) / float(source[1]),
+                    float(sharp_size[0]) / float(sharp_size[1]),
+                    places=2,
+                )
+                self.assertGreater(canvas.getpixel((target[0] + 2, target[1] + 2))[3], 0)
+
     def test_existing_output_gets_versioned_name(self):
         photo = self.root / "photo.png"
         output = self.root / "make-it-alive.png"
@@ -243,8 +288,8 @@ class ComposeMakeItAliveTests(unittest.TestCase):
         with Image.open(str(first)) as first_image, Image.open(
             str(second)
         ) as second_image:
-            first_region = first_image.crop((1390, 1325, 2268, 1455))
-            second_region = second_image.crop((1390, 1325, 2268, 1455))
+            first_region = first_image.crop((1300, 1228, 2290, 1396))
+            second_region = second_image.crop((1300, 1228, 2290, 1396))
             self.assertIsNotNone(
                 ImageChops.difference(first_region, second_region).getbbox()
             )
