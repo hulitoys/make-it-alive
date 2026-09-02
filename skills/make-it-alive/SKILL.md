@@ -1,114 +1,75 @@
 ---
 name: make-it-alive
-description: Turn one visible object in each of one or more user-provided everyday photos into an original collectible-style 精灵, repaint each same scene with the 精灵 replacing that object in place, and compose the complete source photo beside its bright hand-painted transformation scene in an original double collectible-card layout. Use when the user asks to make photographed cups, plants, grass, stones, tools, or other visible objects come alive without copying an existing franchise. Select one object per photo automatically unless the user names it. Do not use for generic photo retouching, exact character replication, or multi-creature sheets.
+description: Turn one visible object in each user-provided everyday photo into an original anime-style 精灵 in the same scene, then deliver only a text-free before-and-after composite. Use for making photographed objects, plants, stones, tools, or other visible scene elements come alive. Landscape inputs are stacked original-over-transformation; portrait inputs are placed original-left and transformation-right.
 ---
 
 # Make It Alive
 
-Create one original 精灵 from one visible everyday object in each input photo. Show the complete source photo beside a hand-painted version of the same scene in which that object has become the 精灵. Present both sides as an original double collectible-card display. Use one image-generation call per input by default. The only deliverable for each input is its finished A+B spread.
+Turn one object in each input photo into an original anime-style 精灵 while keeping the place recognizably the same. The only deliverable is a clean, text-free composite of the complete source photo and the transformed scene.
 
-## Non-negotiable output contract
+## Output contract
 
-- Treat the number of input photos as the required number of final deliverables: one input produces exactly one finished spread; N inputs produce exactly N finished spreads, in the original input order.
-- Process every photo independently. Select one object, create one 精灵, and compose one spread for each photo.
-- Deliver only finished A+B spreads. Never expose a transformed scene B, identity sheet, sketch, candidate image, contact sheet, or uncomposed generated image as a deliverable.
-- Never generate multiple variants for the user to choose from, ask which image they prefer, or pause for aesthetic selection. Make the design decision yourself and continue to composition.
-- Every spread must contain a complete, sharp, uncropped view of source photo A and, on the right, the same-scene illustration B plus a readable name, personality, hobby, and one small unlabelled introduction sentence. Missing any one of these elements means the spread is not deliverable.
-- Do not end after image generation. The deterministic composition and final visual check are mandatory even when B already looks polished.
-- Never run a separate system-font preflight, conclude that the environment lacks Chinese fonts, or ask the user to upload/download a font. Invoke the shipped composer directly; it resolves the bundled CJK font, a system fallback, or a checksum-verified automatic cache fallback internally.
-
-## Inputs
-
-- Require at least one accessible user-supplied scene photo. Ask for a photo if none is available.
-- Accept any number of photos in one request. Do not ask the user to reduce the set or select favorites.
-- Accept an optional target object for one or more photos. Honor it when visible; otherwise say which photo does not contain it and ask only for the missing target decision.
-- Match names and copy to the user's language. Default to Simplified Chinese for Chinese prompts.
+- One input photo produces exactly one final composite. N photos produce exactly N composites in input order.
+- Deliver only the finished composite. Do not show a standalone generated scene, sketch, identity sheet, candidate, or contact sheet.
+- Do not generate variants or ask the user to choose. Select the strongest valid result and finish the composition.
+- Add no words anywhere: no name, personality, hobby, description, title, labels, numbers, logo, watermark, or generated lettering.
+- For a landscape source, place the complete original on top and the transformed scene below.
+- For a portrait source, place the complete original on the left and the transformed scene on the right.
+- Treat a square source as portrait for layout purposes: original left, transformed scene right.
+- Keep both image panels equally sized. A narrow neutral divider is allowed; decorative card frames and information panels are not.
 
 ## Workflow
 
-1. Build the input list and inspect every photo in order.
-   - If it is a local file, inspect it with `view_image` before generation.
-   - Never overwrite, crop, retouch, recolor, publish, or commit the source file. The final compositor may create a temporary blurred cover-fill layer from A behind the complete sharp A layer; this changes only the final derivative canvas, never the source file.
-   - The source may be passed to ImageGen to create a new derivative scene, but it must never be written back to the source path.
+1. Inspect every source photo.
+   - Use `view_image` for accessible local files.
+   - Never overwrite, retouch, crop, publish, or commit the source file.
+   - If the user names a visible target object, use it. Otherwise choose one object automatically based on silhouette, material identity, structural detail, and transformation potential.
 
-2. Select exactly one object per photo.
-   - Use the user's named object when provided.
-   - Otherwise choose without asking. Rank visible non-human objects and plants by silhouette, surface identity, structural detail, and creature-design potential.
-   - Record the object's approximate position and scale plus three nearby landmarks that must remain recognizable in the transformed scene.
-   - Stop and request a clearer photo if no suitable object is visible.
+2. Record the target's approximate position, scale, three nearby landmarks, and three cues to preserve:
+   - dominant silhouette;
+   - main color or material;
+   - one unmistakable structural detail.
 
-3. Read [references/art-direction.md](references/art-direction.md). Use its archetype, naming, writing, fast-path prompt, and QA rules.
+3. Read [references/art-direction.md](references/art-direction.md), then generate one transformed scene per source.
+   - Use built-in `image_gen`, or the runtime's equivalent image-to-image tool, with the source photo as the composition reference for a new derivative output only.
+   - Repaint the complete location as a bright 2D anime scene and replace the selected object in its original position with exactly one original 精灵.
+   - Preserve the source viewpoint, aspect ratio, foreground/middle/background relationships, lighting logic, target scale, ground contact, and the three landmarks.
+   - Preserve all three source-object cues in simplified anatomy, an expressive face, and a clear animated silhouette.
+   - Require no text, symbols, card frame, statistics, brand elements, existing characters, or watermark.
+   - Request one image only. Make one focused correction only for a mandatory failure such as the original object remaining, wrong placement, changed location, duplicate creature, text, or obvious 3D rendering.
 
-4. Draft one concept record per photo:
+4. Compose the final image with the shipped deterministic script:
 
    ```text
-   selected_object: <one visible object>
-   source_region: <relative position and scale>
-   scene_landmarks: [<nearby landmark 1>, <landmark 2>, <landmark 3>]
-   preserved_cues: [<silhouette>, <color/material>, <structural detail>]
-   archetype: <gentle|nimble|fierce|evolved-guardian>
-   name_candidates: [<five original names>]
-   name: <selected 2-4-character Chinese name, or compact localized name>
-   personality: <2-6 plain Chinese characters>
-   hobby: <4-10-character observable verb-object activity>
-   intro: <24-44-character natural, logically coherent introduction sentence>
+   python <skill-dir>/scripts/compose_make_it_alive.py \
+     --photo <source-photo> \
+     --scene <text-free-anime-scene> \
+     --output output/make-it-alive/make-it-alive.png
    ```
 
-   - Run the reference's spoken-naturalness and logical-coherence checks on personality, hobby, and intro. Rewrite any field that sounds unnatural when read aloud or whose subject, action, object, or causal relationship does not make sense.
+   - The script applies EXIF display orientation and never writes to the source.
+   - It chooses top/bottom for landscape and left/right for portrait or square.
+   - It proportionally scales the complete source. If the generated scene has a slightly different aspect ratio, it uses a subordinate blurred extension behind a complete sharp scene rather than leaving empty bands.
+   - The script adds no text and has no font dependency.
+   - Existing outputs are protected with versioned filenames.
 
-5. Generate one transformed scene B per photo in one fast-path call each.
-   - In Codex, use built-in `image_gen`. On another agent runtime, use its equivalent single-call image-to-image capability only when available. Do not switch to a paid API or CLI without explicit user approval.
-   - Pass the source photo as the composition/edit target for a **new derivative output only**. Do not generate a separate identity sheet first.
-   - In the same prompt, define one original 精灵 from the archetype and three preserved cues, remove the selected object, and put the 精灵 at its original position, approximate scale, depth, and ground contact.
-   - Repaint the complete photo as a bright gouache-and-colored-pencil creature-card illustration. Preserve the camera viewpoint, source aspect ratio, major spatial relationships, and three landmarks.
-   - Require exactly one 精灵 and no generated text, frame, property icon, energy symbol, statistics, logo, watermark, or existing character.
-   - Request exactly one image from the image tool. If a runtime nevertheless returns variants, choose the strongest valid one yourself and do not show the variants or ask the user to choose.
-   - Inspect B once. Accept it immediately when the mandatory checks pass. Make one focused correction only when the source object remains, the 精灵 is in the wrong region, a landmark drifts badly, generated text appears, or the scene is gloomy, glossy, or 3D. Do not spend another generation on minor aesthetic preferences.
+5. Inspect every final composite with `view_image` before delivery.
+   - Confirm the source is complete and first in reading order.
+   - Confirm the second panel is the same scene in bright anime form, with the object replaced in place by exactly one original 精灵.
+   - Confirm the viewpoint, landmarks, three object cues, orientation rule, and equal panel sizes.
+   - Confirm there is no text, card UI, brand imagery, existing character, photorealistic monster, plastic 3D finish, or watermark.
+   - Deliver exactly one final composite per input and do not expose intermediates.
 
-6. Compose every final spread. This step cannot be skipped.
-   - Resolve the skill directory to an absolute path and quote all arguments:
+## Failure rules
 
-     ```text
-     python <skill-dir>/scripts/compose_make_it_alive.py \
-       --photo <source-photo-A> \
-       --scene <transformed-scene-B> \
-       --name <name> \
-       --personality <personality> \
-       --hobby <hobby> \
-       --intro <small unlabelled introduction sentence> \
-       --output output/make-it-alive/<name>-make-it-alive.png
-     ```
+- If no suitable object is visible, request a clearer photo.
+- If a named object is absent, ask for a different target rather than silently substituting one.
+- If image generation is unavailable, explain that the transformation cannot be completed. Do not silently switch to a paid API or CLI.
+- If Pillow is unavailable, report that it is required and ask before installing it.
+- If composition fails, preserve the generated scene and rerun only the deterministic composition step.
 
-   - The script applies EXIF display orientation and proportional containment to the complete sharp A layer. It never writes to A. To make both landscape and portrait inputs fill a tall card art window without large empty bands, it places a softly blurred cover-crop of the same image behind that complete sharp layer; the readable source image itself remains uncropped and unobscured.
-   - The composer presents A and B as two richly framed, original collectible cards with staggered depth, foil-like trim, scene-derived color, a strong name-first hierarchy, clear trait panels, and a smaller unlabelled introduction. It must look intentionally designed rather than like a flat split-screen or minimal document template.
-   - Borrow only general collectible-card hierarchy. Never reproduce an existing card frame, logo, property icon, energy symbol, statistic system, set mark, rarity mark, or branded typography.
-   - The composer uses `assets/fonts/NotoSansCJKsc-Regular.otf` by default. If an installer omitted that asset, it tries a system CJK font and then downloads the same SIL-OFL font from the fixed upstream URL into a temporary cache, verifying SHA-256 before use. Do not handle this process outside the script and do not ask the user for a font. `--font <path>` remains an optional explicit override.
-   - If Pillow is unavailable, report that it is required and ask before installing it. If all three internal font routes fail, report the exact packaging or network failure, preserve B, and retry only the composition after the runtime is restored; do not request a user font upload.
+## Speed target
 
-7. Validate and deliver only the finished spread or spreads.
-   - Inspect every final spread with `view_image`.
-   - Confirm the complete sharp A layer is present and uncropped, the source file hash is unchanged, and any extra fill around A is visibly subordinate blur rather than invented content. Confirm B matches its viewpoint and landmarks; the selected object is replaced in place; the 精灵 preserves all three cues; the name, personality, hobby, and small introduction are present, exact, readable, natural, and not clipped.
-   - Confirm landscape, portrait, and square inputs fill both card windows without large blank matte areas; the complete sharp image must remain easy to distinguish from its blurred extension.
-   - Confirm there is no thick black outline, gloomy gray cast, generated text, trademarked imagery, plastic 3D finish, or watermark.
-   - Count the finished spread paths before responding. The count must equal the number of input photos; if it does not, finish the missing compositions first.
-   - For one input, display exactly one final A+B spread inline. For N inputs, display exactly N final A+B spreads inline in input order.
-   - Keep the response minimal: provide the final image or images and their paths. Do not display or link intermediate B images, candidates, or corrections, and do not ask for a preference after delivery.
-
-## Failure Rules
-
-- If built-in image generation is unavailable, offer the API/CLI fallback only as an explicit opt-in that requires an API key.
-- If the named object is absent, do not substitute another object silently.
-- If generated art contains text or protected brand elements, regenerate instead of covering them.
-- If the transformed scene cannot preserve the location after one correction, explain the mismatch rather than claiming exact correspondence.
-- If composition fails, preserve all inputs and rerun only the deterministic composition step.
-- A missing system font is not a valid stopping condition. Always run the composer so its packaged and verified automatic font routes can execute.
-- If any required text field is missing, unnatural when read aloud, logically incoherent, or clipped, fix it and recompose before delivery.
-
-## Speed Target
-
-- Treat 60 seconds as a best-effort fast-path target, not a guaranteed service level; image-tool queue and model latency are outside the Skill's control.
-- Use exactly one generation call per input when the first result passes mandatory QA. Concept drafting and deterministic composition should add only a few seconds on a typical local Python environment.
-- Request one generated image per input only. When the runtime exposes size controls, use a roughly 1K-class image at the source aspect ratio because B is placed inside a 915×952 region; do not request 2K/4K or multiple variants by default.
-- For multiple inputs, parallelize independent generation and composition when the runtime and image tool allow it, then restore the original input order for delivery.
-- Use a runtime's fast prompt-optimization mode when available, but never weaken the mandatory placement, no-text, and no-brand constraints.
-- Offer a slower two-stage identity-sheet workflow only when the user explicitly prioritizes character consistency over speed.
+- Use one roughly 1K-class generation per input by default and avoid multiple candidates.
+- Treat one minute per image as a best-effort target; image-model queue time remains outside the Skill's control.
+- Process independent multiple inputs in parallel when the runtime supports it, then restore input order for delivery.

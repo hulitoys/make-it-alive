@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make It Alive"
+  short_description: "把照片物件变成精灵并输出原创收藏卡式双卡成品"
+  default_prompt: "使用 $make-it-alive 处理我上传的全部照片，直接输出最终排版成品。"
