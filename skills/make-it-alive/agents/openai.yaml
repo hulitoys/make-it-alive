@@ -1,4 +1,4 @@
 interface:
   display_name: "Make It Alive"
-  short_description: "把照片物件变成动漫精灵并输出无文字前后对照图"
-  default_prompt: "使用 $make-it-alive 处理我上传的照片，直接输出无文字最终成品。"
+  short_description: "将完整照片场景与物体动漫化，输出撕页过渡无文字对照图"
+  default_prompt: "使用 $make-it-alive 将我上传的完整场景动漫化并处理其中的物体，直接输出无文字最终成品。"

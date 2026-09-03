@@ -50,14 +50,25 @@ class ComposeMakeItAliveTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def compose(self, photo, output, scene=None, long_edge=800, gap=12):
-        return COMPOSER.compose_make_it_alive(
+    def compose(
+        self,
+        photo,
+        output,
+        scene=None,
+        long_edge=800,
+        transition_width=32,
+        gap=None,
+    ):
+        arguments = dict(
             photo_path=photo,
             scene_path=scene or self.scene,
             output_path=output,
             long_edge=long_edge,
-            gap=gap,
+            transition_width=transition_width,
         )
+        if gap is not None:
+            arguments["gap"] = gap
+        return COMPOSER.compose_make_it_alive(**arguments)
 
     def test_landscape_stacks_original_above_scene(self):
         photo = self.root / "landscape.png"
@@ -70,10 +81,11 @@ class ComposeMakeItAliveTests(unittest.TestCase):
             photo, self.root / "stacked.png", scene=landscape_scene
         )
         with Image.open(str(result)) as final_image:
-            self.assertEqual((800, 912), final_image.size)
+            self.assertEqual((800, 932), final_image.size)
             self.assertEqual((30, 55, 80), final_image.getpixel((5, 5)))
-            self.assertEqual((77, 155, 211), final_image.getpixel((5, 467)))
-            self.assertEqual(COMPOSER.DIVIDER_COLOR, final_image.getpixel((5, 455)))
+            self.assertEqual((77, 155, 211), final_image.getpixel((5, 487)))
+            transition = final_image.crop((0, 450, 800, 482))
+            self.assertGreater(len(set(transition.getdata())), 8)
 
     def test_portrait_places_original_left_and_scene_right(self):
         photo = self.root / "portrait.png"
@@ -84,10 +96,11 @@ class ComposeMakeItAliveTests(unittest.TestCase):
             photo, self.root / "side-by-side.png", scene=portrait_scene
         )
         with Image.open(str(result)) as final_image:
-            self.assertEqual((912, 800), final_image.size)
+            self.assertEqual((932, 800), final_image.size)
             self.assertEqual((42, 69, 91), final_image.getpixel((5, 5)))
-            self.assertEqual((86, 166, 204), final_image.getpixel((467, 5)))
-            self.assertEqual(COMPOSER.DIVIDER_COLOR, final_image.getpixel((455, 5)))
+            self.assertEqual((86, 166, 204), final_image.getpixel((487, 5)))
+            transition = final_image.crop((450, 0, 482, 800))
+            self.assertGreater(len(set(transition.getdata())), 8)
 
     def test_square_uses_side_by_side_layout(self):
         photo = self.root / "square.png"
@@ -96,7 +109,7 @@ class ComposeMakeItAliveTests(unittest.TestCase):
         make_fixture(scene, (1000, 1000), (78, 157, 205), (245, 135, 71))
         result = self.compose(photo, self.root / "square-final.png", scene=scene)
         with Image.open(str(result)) as final_image:
-            self.assertEqual((1612, 800), final_image.size)
+            self.assertEqual((1632, 800), final_image.size)
 
     def test_landscape_portrait_and_square_keep_source_hash_unchanged(self):
         cases = [(1600, 900), (900, 1600), (1000, 1000)]
@@ -115,8 +128,30 @@ class ComposeMakeItAliveTests(unittest.TestCase):
         make_fixture(scene, (700, 1200), (83, 162, 206), (246, 137, 72))
         result = self.compose(photo, self.root / "mismatch.png", scene=scene)
         with Image.open(str(result)).convert("RGBA") as final_image:
-            self.assertEqual((800, 912), final_image.size)
+            self.assertEqual((800, 932), final_image.size)
             self.assertTrue(all(pixel[3] == 255 for pixel in final_image.getdata()))
+
+    def test_torn_transition_is_deterministic(self):
+        photo = self.root / "photo.png"
+        scene = self.root / "scene.png"
+        make_fixture(photo, (1200, 900), (45, 69, 92), (232, 196, 82))
+        make_fixture(scene, (1200, 900), (77, 155, 211), (247, 147, 65))
+        first = self.compose(photo, self.root / "first.png", scene=scene)
+        second = self.compose(photo, self.root / "second.png", scene=scene)
+        self.assertEqual(file_hash(first), file_hash(second))
+
+    def test_transition_accents_are_scene_derived_and_distinct(self):
+        warm = Image.new("RGB", (120, 120), (210, 75, 46))
+        warm_draw = ImageDraw.Draw(warm)
+        warm_draw.rectangle((60, 0, 119, 119), fill=(46, 116, 198))
+        cool = Image.new("RGB", (120, 120), (45, 154, 178))
+        cool_draw = ImageDraw.Draw(cool)
+        cool_draw.rectangle((60, 0, 119, 119), fill=(191, 77, 162))
+        warm_colors = COMPOSER._derive_transition_colors(warm)
+        cool_colors = COMPOSER._derive_transition_colors(cool)
+        self.assertNotEqual(warm_colors, cool_colors)
+        self.assertNotEqual(warm_colors[0], warm_colors[1])
+        self.assertNotEqual(cool_colors[0], cool_colors[1])
 
     def test_existing_output_gets_versioned_name(self):
         photo = self.root / "photo.png"
@@ -141,15 +176,31 @@ class ComposeMakeItAliveTests(unittest.TestCase):
         self.assertEqual("photo.png", parsed.photo)
         self.assertEqual("scene.png", parsed.scene)
         self.assertEqual("final.png", parsed.output)
+        self.assertEqual(COMPOSER.DEFAULT_TRANSITION_WIDTH, parsed.transition_width)
         self.assertFalse(hasattr(parsed, "name"))
         self.assertFalse(hasattr(parsed, "font"))
+
+    def test_gap_cli_alias_maps_to_transition_width(self):
+        parsed = COMPOSER.parse_args(
+            [
+                "--photo",
+                "photo.png",
+                "--scene",
+                "scene.png",
+                "--output",
+                "final.png",
+                "--gap",
+                "36",
+            ]
+        )
+        self.assertEqual(36, parsed.transition_width)
 
     def test_invalid_size_controls_are_rejected(self):
         photo = self.root / "photo.png"
         make_fixture(photo, (1200, 900), (45, 69, 92), (232, 196, 82))
         with self.assertRaisesRegex(ValueError, "Long edge"):
             self.compose(photo, self.root / "small.png", long_edge=200)
-        with self.assertRaisesRegex(ValueError, "Gap"):
+        with self.assertRaisesRegex(ValueError, "Transition width"):
             self.compose(photo, self.root / "wide-gap.png", gap=200)
 
     def test_missing_scene_has_actionable_error(self):

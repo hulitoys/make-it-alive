@@ -1,6 +1,6 @@
 # Anime Transformation Direction
 
-Use this reference when creating the transformed scene. The target is the approachable clarity and adventure feeling of classic creature-collection animation, not a copy of any existing franchise, character, or branded card design.
+Use this reference when creating the transformed scene. The whole frame—not only the 精灵—must read as a hand-drawn 2D anime image. The target is the approachable clarity and adventure feeling of classic creature-collection animation, not a copy of any existing franchise, character, or branded card design.
 
 ## Select and locate the object
 
@@ -29,13 +29,14 @@ Use a clear silhouette, expressive eyes, simplified anatomy, and a pose that sug
 
 ## Anime scene language
 
+- **Whole-frame conversion:** redraw every visible object and surface in the same 2D visual language. Replace photographic noise, lens texture, realistic micro-detail, and live-action material rendering with simplified shapes, colored lines, cel-shadow groups, and painted anime texture. No region may remain as a photographic patch.
 - **Look:** bright hand-drawn 2D creature-adventure animation; clean colored linework; simple cel shading; softly painted anime background; lively facial animation.
 - **Color:** clear local colors, warm environmental bounce, readable light and shadow, and a few saturated focal accents.
 - **Scene:** retain the source camera viewpoint, aspect ratio, spatial structure, time of day, and recognizable landmarks. Anime-stylize the same place instead of inventing a new location.
 - **Placement:** remove the original target object and put the 精灵 at the same position, scale, depth, orientation, and ground contact.
 - **Originality:** use only broad creature-animation design language. Do not reproduce an existing character, franchise-specific silhouette, logo, interface, icon, costume, or named style asset.
 
-Avoid photorealism, live-action textures, plastic 3D rendering, heavy black contour, gray-brown gloom, cinematic horror, hyper-detailed armor, neon rim light, perfect symmetry, generic mascot blobs, or a different location.
+Avoid partial stylization where only the creature is animated, photorealistic walls or props, retained camera noise, live-action textures, plastic 3D rendering, heavy black contour, gray-brown gloom, cinematic horror, hyper-detailed armor, neon rim light, perfect symmetry, generic mascot blobs, or a different location.
 
 ## Fast image-to-image prompt
 
@@ -43,15 +44,15 @@ Avoid photorealism, live-action textures, plastic 3D rendering, heavy black cont
 Use case: single-call image-to-image scene transformation
 Asset type: text-free anime scene for a before-and-after composite
 Input: Image 1 is the source scene and composition reference for a new derivative output only
-Primary request: redraw the complete source location as a bright hand-drawn 2D creature-collection anime scene; remove [selected object] and replace it in place with exactly one original 精灵
+Primary request: redraw every pixel of the complete source frame as one coherent bright hand-drawn 2D creature-collection anime scene; remove [selected object] and replace it in place with exactly one original 精灵
 Creature design: convert [silhouette cue], [color/material cue], and [structural cue] into coherent simplified anatomy, expressive eyes, a clear animated silhouette, and a pose showing [visible behavior]
-Scene fidelity: preserve the original aspect ratio, camera viewpoint, foreground/middle/background structure, time-of-day logic, and [three landmarks]
+Scene fidelity: preserve the original aspect ratio, camera viewpoint, foreground/middle/background structure, time-of-day logic, and [three landmarks], while fully anime-redrawing every wall, surface, prop, plant, liquid, reflection, shadow, and distant detail
 Placement: match the source object's approximate position, scale, depth, orientation, and ground contact; the original object must be absent
-Style: clean colored linework, bright cel-shaded character, softly painted anime background, lively but natural palette, approachable adventure mood
-Constraints: exactly one original creature; same recognizable place; no literal intact object with limbs; no text, letters, numbers, symbols, captions, frame, statistics, logo, watermark, or existing franchise element
-Avoid: changed location, moved landmarks, duplicate creature, remaining source object, photorealism, 3D plastic gloss, gloomy grading, heavy black outline, branded character design, AI gibberish
+Style: consistent full-frame 2D animation, clean colored linework, bright cel-shaded character and props, softly painted anime environment, lively but natural palette, approachable adventure mood
+Constraints: exactly one original creature; same recognizable place; every region visibly illustrated rather than photographed; no literal intact object with limbs; no text, letters, numbers, symbols, captions, frame, statistics, logo, watermark, or existing franchise element
+Avoid: only stylizing the creature, photographic background patches, realistic camera noise or material microtexture, changed location, moved landmarks, duplicate creature, remaining source object, photorealism, 3D plastic gloss, gloomy grading, heavy black outline, branded character design, AI gibberish
 ```
 
 ## Acceptance check
 
-Accept the scene when exactly one original 精灵 replaces the target in the recorded region, the literal object is absent, all three cues and landmarks remain recognizable, the scene reads as bright 2D anime, and there is no text or branded imagery. Request one focused correction only for a mandatory failure.
+Accept the scene when exactly one original 精灵 replaces the target in the recorded region, the literal object is absent, all three cues and landmarks remain recognizable, and the entire frame—including background and minor props—reads as one bright 2D anime illustration with no photographic patches, text, or branded imagery. Request one focused correction only for a mandatory failure.
